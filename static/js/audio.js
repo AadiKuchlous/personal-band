@@ -1,7 +1,9 @@
 var context;
 var bufferLoader;
 var sampleList;
-// window.addEventListener('load', init, false);
+
+var tempo = 60; // BPM (beats per minute)
+var eighthNoteTime = (60 / tempo) / 2;
 
 //Defining BufferLoader class
 function BufferLoader(context, urlList, callback) {
@@ -54,7 +56,7 @@ BufferLoader.prototype.load = function() {
 
 
 function init() {
-//  try {
+  try {
     // Fix up for prefixing
     window.AudioContext = window.AudioContext||window.webkitAudioContext;
     context = new AudioContext();
@@ -69,33 +71,68 @@ function init() {
       );
 
     bufferLoader.load();
-//  }
-//  catch(e) {
-//    alert('Web Audio API is not supported in this browser');
-//  }
+  }
+  catch(e) {
+    alert('Web Audio API is not supported in this browser');
+  }
+}
+
+function play_line(index, value, line_start_time){
+  let inst = $(value);
+  blocks = inst.children();
+  var buffer = sampleList[index]
+  let prev_time = line_start_time;
+  for (var i = 0; i < blocks.length; i++){
+    if (i==0) {
+      playSound(buffer, line_start_time);
+    }
+    else {
+      let start_time = prev_time + eighthNoteTime * 2 * (blocks.eq(i-1).width())/100;
+      playSound(buffer, start_time);
+      prev_time = start_time;
+    }
+  }
 }
 
 var audioBuffer = null;
 
 function playSequence() {
-  var tempo = 80; // BPM (beats per minute)
-  var eighthNoteTime = (60 / tempo) / 2;
+  let cur_time = context.currentTime;
 
-  for (var i = 0; i < document.getElementsByClassName('block_guitar').length; i++){
+  let guit_blocks = $('.block_guitar');
+
+  let instruments = $("#arrange_area").children(".inst_line");
+  
+  instruments.each(((time) => {
+	return (index, value) => {
+	  play_line(index, value, time);
+	}
+  })(cur_time));
+
+/*
+  for (var i = 0; i < guit_blocks.length; i++){
     var buffer = sampleList[0]
-    playSound(buffer, context.currentTime + i * eighthNoteTime * 2);
+    if (i==0) {
+      playSound(buffer, cur_time);
+    }
+    else {
+      let start_time = prev_time + eighthNoteTime * 2 * (guit_blocks.eq(i-1).width())/100;
+      playSound(buffer, start_time);
+      prev_time = start_time;
+    }
   }
 
   for (var i = 0; i < document.getElementsByClassName('block_piano').length; i++){
     var buffer = sampleList[1]
     playSound(buffer, context.currentTime + i * eighthNoteTime * 2);
   }
+*/
 }
 
 function playSound(buffer, time) {
   var source = context.createBufferSource();
   source.buffer = buffer;
-  console.log(buffer)
+//   console.log(buffer)
   source.connect(context.destination);
   console.log(time);
   source.start(time);

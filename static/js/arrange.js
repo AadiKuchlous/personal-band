@@ -1,19 +1,31 @@
 function addblock(inst) {
-  const arrange_area = document.getElementById("arrange_area");
-  var block = document.createElement("DIV");
-  var class_name = "block_" + inst;
-  block.classList.add(class_name);
-  block.style.height = "100px";
-  block.style.width = "100px";
-  block.style.margin = "10px";
-  block.style.display = "inline-flex";
+  const arrange_area = $("#arrange_area");
+
+  let class_name = "block_" + inst;
+  var index = $('.'+class_name).length + 1;
+  let block = $('<div/>');
+  block.addClass(class_name)
+	.addClass('inst_block')
+	.addClass("ui-widget-content")
+	.css({
+	    height: "100px",
+	    width: "100px",
+	    display: "inline-flex"})
+	.attr('id', inst + index.toString());
+//	.click(block_clicked);
+  block.resizable({grid: [ 100 ], maxHeight: 100, minHeight: 100});
   
-  if (!(arrange_area.contains(document.getElementById(inst)))) {
-    var div = document.createElement("DIV")
-    div.id = inst;
-    div.style.display = "flex";
-    div.style.flexDirection = "row";
-    arrange_area.appendChild(div);
+  if (!($.contains(document.body, document.getElementById(inst)))) {
+    var div = $('<div/>');
+    div.attr('id', inst)
+	.addClass("inst_line")
+	.css({
+	  display :"flex",
+	  flexDirection: "row",
+	  width: "100%",
+	  padding: "10px"
+	});
+    arrange_area.append(div);
   }
   
   var color = null;
@@ -26,7 +38,13 @@ function addblock(inst) {
       break;
   }
 
-  block.style.backgroundColor = color;
+  block.css({backgroundColor: color});
 
-  document.getElementById(inst).appendChild(block);
+  let inst_area = $('#'+inst);
+  inst_area.append(block);
+}
+
+var block_clicked = function() {
+  this.innerHTML = this.id;
+  console.log(this.id);
 }
