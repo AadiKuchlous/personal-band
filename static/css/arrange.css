@@ -5,3 +5,7 @@
 // .inst_block:hover { 
 //  border: 7px solid #d0d0d0;
 //}
+
+button.col-5 {
+  margin: 5px;
+}
