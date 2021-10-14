@@ -53,6 +53,9 @@ function addblock(inst) {
 	  padding: "10px",
 	})
 	.attr('position', $("#arrange-area").children(".inst_line").length);
+
+    let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
+    div.append(add_button);
     arrange_area.append(div);
 
     let line_dict = {
@@ -61,6 +64,9 @@ function addblock(inst) {
 	  "blocks": []
 	};
     arrange_data.push(line_dict);
+    track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
+    $('#track-list').append(track_header)
+
   }
 
   let class_name = "block_" + inst;
@@ -162,9 +168,6 @@ function addblock(inst) {
   $('#exampleModalCenter').modal('show');
   
   arrange_data[line_index]["blocks"].push(block_obj);
-
-  track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
-  $('#track-list').append(track_header)
 }
 
 

@@ -27,8 +27,11 @@ function play_line(line, line_start_time, index){
 }
 
 var audioBuffer = null;
+var playing = false;
+var position = 0;
 
 function playSequence() {
+  
   console.log(bufferlist);
   let cur_time = context.currentTime;
 
@@ -49,3 +52,24 @@ function pauseSound() {
   context.close();
   context = new AudioContext();
 }
+
+
+$(document).ready(function(){
+  $(this).keydown(function(e) {
+    if(e.which == 32) {
+      e.preventDefault();
+    }
+  });
+
+
+  $(this).keyup(function (e) {
+    code = e.which
+    if (code == 32) {
+      if (e.stopPropagation) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+      playSequence()
+    }
+  })
+})
