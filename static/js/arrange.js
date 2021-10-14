@@ -1,5 +1,9 @@
 let arrange_data = [];
 
+function capitalize(word) {
+  return word[0].toUpperCase() + word.slice(1).toLowerCase();
+}
+
 function generateDropdownItems(items) {
   let dropdown_items = []
   items.forEach(
@@ -159,7 +163,7 @@ function addblock(inst) {
   
   arrange_data[line_index]["blocks"].push(block_obj);
 
-  track_header = $('<div/>').addClass('track-header')
+  track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
   $('#track-list').append(track_header)
 }
 
@@ -189,7 +193,7 @@ function loadModal(block) {
 	.attr('role', 'tab')
 	.attr('aria-controls', 'nav-'+section)
 	.attr('aria-selected', 'true')
-	.html(section)
+	.html(capitalize(section))
     nav_div.append(tab)
 
     let container = $('<div/>').addClass('container')
