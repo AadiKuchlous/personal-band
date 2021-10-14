@@ -36,7 +36,7 @@ function generateDropdownItems(items) {
 }
 
 function addblock(inst) {
-  const arrange_area = $("#arrange_area");
+  const arrange_area = $("#arrange-area");
 
   if (!($.contains(document.body, document.getElementById(inst)))) {
     var div = $('<div/>');
@@ -48,7 +48,7 @@ function addblock(inst) {
 	  width: "100%",
 	  padding: "10px",
 	})
-	.attr('position', $("#arrange_area").children(".inst_line").length);
+	.attr('position', $("#arrange-area").children(".inst_line").length);
     arrange_area.append(div);
 
     let line_dict = {
@@ -69,7 +69,8 @@ function addblock(inst) {
 	    height: "100px",
 	    width: "100px",
 	    display: "inline-flex",
-            position: "relative"
+            position: "relative",
+            "border-radius": "10px"
         })
 	.attr('id', block_id)
         .attr('position', index)
@@ -92,26 +93,25 @@ function addblock(inst) {
   });
 
   let length_dropdown = $('<div/>').addClass('dropdown')
+        .addClass('length-dropdown')
         .css(
           {
-            "top": "1px",
-            "right": "1px",
+            "bottom": "20px",
+            "right": "17px",
             "position": "absolute"
           }
         )
 
-  let length_button = $('<button/>')
+  let length_button = $('<div/>')
 	.css(
           {
-            "height": "10px",
-            "width": "10px",
+            "height": "15px",
+            "width": "15px",
             "margin-left": "auto",
-            "top": "1px",
-            "right": "1px",
-            "position": "absolute"
+            "position": "absolute",
+            "background": "url(https://static.soundtrap.com/studio/assets/images/studio/rh_end.png) no-repeat"
           }
         )
-	.addClass('dropdown-toggle')
 	.attr('data-toggle', 'dropdown')
 
   length_dropdown.append(length_button)
@@ -158,6 +158,9 @@ function addblock(inst) {
   $('#exampleModalCenter').modal('show');
   
   arrange_data[line_index]["blocks"].push(block_obj);
+
+  track_header = $('<div/>').addClass('track-header')
+  $('#track-list').append(track_header)
 }
 
 
