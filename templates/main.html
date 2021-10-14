@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+<title>Personal Band</title>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
@@ -16,27 +16,42 @@
 
 <link rel="stylesheet" href="{{url_for('static', filename='css/arrange.css')}}">
 
+<script src="{{url_for('static', filename='js/load_buffers.js')}}"></script>
 <script src="{{url_for('static', filename='js/audio.js')}}"></script>
 <script src="{{url_for('static', filename='js/arrange.js')}}"></script>
 
 </head>
 <body>
 
+<div style="position:sticky; top:0; left:0;">
+<button class="btn btn-primary" onclick="init()">Start</button>
+
+<div class="playback-button" onclick="pauseSound()">
+<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+width="40" height="40"
+viewBox="0 0 172 172" class="playback-button-svg"
+style=" fill:#000000;"><g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#000000"><path d="M121.83333,136.16667h-71.66667c-7.91917,0 -14.33333,-6.41417 -14.33333,-14.33333v-71.66667c0,-7.91917 6.41417,-14.33333 14.33333,-14.33333h71.66667c7.91917,0 14.33333,6.41417 14.33333,14.33333v71.66667c0,7.91917 -6.41417,14.33333 -14.33333,14.33333z"></path></g></g></g></svg>
+</div>
+
+<div class="playback-button" onclick="playSequence()">
+<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+width="48" height="48"
+viewBox="0 0 24 24" class="playback-button-svg"
+style=" fill:#000000;">    <path d="M8,6.822v10.357c0,0.789,0.871,1.267,1.537,0.844l8.137-5.178c0.618-0.393,0.618-1.294,0-1.687L9.537,5.978 C8.871,5.554,8,6.033,8,6.822z"></path></svg>
+</div>
+</div>
+
 <div id="arrange_area" style:"display:flex; flex-direction:row"></div>
 
 <br>
 
-<button class="btn btn-primary" onclick="init()">Start</button>
-
-<button class="btn btn-primary" onclick="playSequence()">Play</button>
-<button class="btn btn-primary" onclick="pauseSound()">Pause</button>
-
-<div class="dropdown">
+<div class="dropdown" id="add-intrument">
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">+</button>
 
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-    <button class="dropdown-item" onclick="addblock('guitar')">Guitar</button>
-    <button class="dropdown-item" onclick="addblock('piano')">Piano</button>
+    {% for inst in insts -%}
+      <button class="dropdown-item" onclick="addblock('{{inst}}')">{{inst}}</button>
+    {%- endfor %}
   </div>
 </div>
 
@@ -51,22 +66,9 @@
         </button>
       </div>
       <div class="modal-body">
-	<div class="container" style="width:100%">
-	<div class="row justify-content-around">
-        <button class="col-5 align-self-start" style="height:100px;"></button>
-        <button class="col-5 align-self-end" style="height:100px;"></button>
-        <button class="col-5 align-self-start" style="height:100px;"></button>
-        <button class="col-5 align-self-end" style="height:100px;"></button>
-        <button class="col-5 align-self-start" style="height:100px;"></button>
-        <button class="col-5 align-self-end" style="height:100px;"></button>
-        <button class="col-5 align-self-start" style="height:100px;"></button>
-        <button class="col-5 align-self-end" style="height:100px;"></button>
-        </div>
-	</div>
-      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
       </div>
     </div>
   </div>
