@@ -41,6 +41,13 @@
       style=" fill:#000000;">    <path d="M8,6.822v10.357c0,0.789,0.871,1.267,1.537,0.844l8.137-5.178c0.618-0.393,0.618-1.294,0-1.687L9.537,5.978 C8.871,5.554,8,6.033,8,6.822z"></path>
     </svg>
   </div>
+
+<div class="heading-and-button tempo" title="Edit tempo" style="user-select: none; touch-action: pan-y; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);">
+  <span id="tempo-span">120</span>
+  <input id="tempo-input"  type="number" value="">
+  <span class="hidden"><span>Tempo</span></span>
+</div>
+
 </div>
 
 
@@ -51,12 +58,12 @@
   <div id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     +
     <br/>
-    Add New Block
+    Add New Track
   </div>
 
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
     {% for inst in insts -%}
-      <button class="dropdown-item" onclick="addblock('{{inst}}')">{{inst}}</button>
+      <button class="dropdown-item" onclick="addLine('{{inst}}')">{{inst}}</button>
     {%- endfor %}
   </div>
 </div>

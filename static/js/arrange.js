@@ -39,13 +39,15 @@ function generateDropdownItems(items) {
   return(dropdown_items)
 }
 
-function addblock(inst) {
-  const arrange_area = $("#arrange-area");
 
-  if (!($.contains(document.body, document.getElementById(inst)))) {
-    var div = $('<div/>');
-    div.attr('id', inst)
+function addLine(inst) {
+  let arrange_area = $("#arrange-area");
+  let div = $('<div/>');
+  let index = $('.'+inst+'_line').length
+  let id = inst+'-'+index.toString()
+  div.attr('id', id)
 	.addClass("inst_line")
+	.addClass(inst+'_line')
 	.css({
 	  display :"flex",
 	  flexDirection: "row",
@@ -54,20 +56,30 @@ function addblock(inst) {
 	})
 	.attr('position', $("#arrange-area").children(".inst_line").length);
 
-    let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
-    div.append(add_button);
-    arrange_area.append(div);
+  let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
+  add_button.click(((inst, id) => {
+    return function() {
+      addblock(inst, id)
+    }
+  })(inst,id))
+  div.append(add_button);
+  arrange_area.append(div);
 
-    let line_dict = {
+  let line_dict = {
 	  "inst": inst,
 	  "pos": arrange_data.length + 1,
 	  "blocks": []
 	};
-    arrange_data.push(line_dict);
-    track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
-    $('#track-list').append(track_header)
+  arrange_data.push(line_dict);
+  track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
+  $('#track-list').append(track_header)
 
-  }
+}
+
+
+function addblock(inst, id) {
+  let arrange_area = $("#arrange-area");
+  let inst_area = $('#'+id);
 
   let class_name = "block_" + inst;
   var index = $('.'+class_name).length + 1;
@@ -147,10 +159,6 @@ function addblock(inst) {
   }
 
   block.css({backgroundColor: color});
-
-//  loadModal('#exampleModalCenter', block_id);
-
-  let inst_area = $('#'+inst);
 
   inst_area.append(block);
 

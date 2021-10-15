@@ -12,6 +12,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+}
+
+.add-block:hover {
+  background-color: #c8c9e9;
 }
 
 #dropdownMenuButton {
@@ -68,6 +73,7 @@ button.col-5 {
 #control-bar {
   position: sticky;
   top: 0;
+  left: 0;
   z-index: 100;
   background-color:white;
   width: 100%;
@@ -89,19 +95,24 @@ button.col-5 {
 #track-list {
   height: 100%;
   width: 200px;
-  position: absolute;
+  position: sticky;
   top: 0px;
   left: 0px;
   border-right: 1px solid lightgray;
   display: flex;
   flex-direction: column;
+  z-index: 99;
+  background: #f5f5f5;
 }
 
 #arrange-area {
   position: absolute;
   top: 0px;
-  left: 200px;
+  left: 0px;
+  padding-left: 200px;
   height: 100%;
+  width: 100%;
+  background: #f5f5f5;
 }
 
 .track-header {
@@ -113,4 +124,8 @@ button.col-5 {
   text-align: center;
   border-top: 1px solid lightgray;
   border-bottom: 1px solid lightgray;
+}
+
+.hidden {
+  display: none;
 }

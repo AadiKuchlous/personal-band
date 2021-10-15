@@ -1,5 +1,5 @@
 var tempo = 120; // BPM (beats per minute)
-var eighthNoteTime = (60 / tempo) / 2;
+var eighthNoteTime;
 
 function play_line(line, line_start_time, index){
 
@@ -31,7 +31,7 @@ var playing = false;
 var position = 0;
 
 function playSequence() {
-  
+  eighthNoteTime = (60 / tempo) / 2;  
   console.log(bufferlist);
   let cur_time = context.currentTime;
 
@@ -72,4 +72,22 @@ $(document).ready(function(){
       playSequence()
     }
   })
+
+
+  $('#tempo-input').hide()
+  $('#tempo-span').click(function(){
+    $('#tempo-input').show().focus().select().attr('value', $(this).text())
+    $(this).hide()
+  })
+  $('#tempo-input').keyup(function(e){
+    if (e.which == 13) {
+      e.preventDefault();
+      $(this).blur()
+    }
+  }).on('blur', function(){
+      $(this).hide()
+      tempo = $(this).val()
+      $('#tempo-span').show().text(tempo)
+    })
+
 })
