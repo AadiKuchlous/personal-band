@@ -19,13 +19,15 @@
 <script src="{{url_for('static', filename='js/load_buffers.js')}}"></script>
 <script src="{{url_for('static', filename='js/audio.js')}}"></script>
 <script src="{{url_for('static', filename='js/arrange.js')}}"></script>
+<script src="{{url_for('static', filename='js/import_data.js')}}"></script>
 
+<link rel="icon" 
+      type="image/png" 
+      href="{{url_for('static', filename='garage-band.png')}}">
 </head>
 <body>
 
 <div id="control-bar">
-  <button class="btn btn-primary" onclick="init()">Start</button>
-
   <div class="playback-button" onclick="pauseSound()">
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
       width="35" height="35"
@@ -54,6 +56,7 @@
 <div id="studio-body">
 
 <div id="track-list">
+<div id="track-list-grid">
 <div class="dropdown" id="add-intrument">
   <div id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     +
@@ -66,6 +69,7 @@
       <button class="dropdown-item" onclick="addLine('{{inst}}')">{{inst}}</button>
     {%- endfor %}
   </div>
+</div>
 </div>
 </div>
 

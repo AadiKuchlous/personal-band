@@ -1,4 +1,6 @@
 let arrange_data = [];
+let block_length_options = ['1/16', '1/8', '1/4', '1/2', '1']
+let selected_block = null;
 
 function capitalize(word) {
   return word[0].toUpperCase() + word.slice(1).toLowerCase();
@@ -21,14 +23,14 @@ function generateDropdownItems(items) {
           function() {
             $(this).parents('.dropdown-menu').children('.dropdown-item').removeClass('active')
             $(this).addClass('active')
-            let block = $(this).parents('.inst_block')
+            let block = $(this).parents('.inst-block')
             let length = eval(item)*4
             let old_length = eval(block.attr('length'))
             let new_width = block.width() * length / old_length
             block.width(new_width)
             block.attr('length', length.toString())
-            let line_index = parseInt(block.parents('.inst_line').attr('position'))
-            let block_index = parseInt(block.attr('position')) - 1
+            let line_index = parseInt(block.parents('.inst-line').attr('position'))
+            let block_index = parseInt(block.attr('position'))
             arrange_data[line_index]['blocks'][block_index]['length'] = length
           }
       )
@@ -39,115 +41,45 @@ function generateDropdownItems(items) {
   return(dropdown_items)
 }
 
-
-function addLine(inst) {
-  let arrange_area = $("#arrange-area");
-  let div = $('<div/>');
-  let index = $('.'+inst+'_line').length
-  let id = inst+'-'+index.toString()
-  div.attr('id', id)
-	.addClass("inst_line")
-	.addClass(inst+'_line')
-	.css({
-	  display :"flex",
-	  flexDirection: "row",
-	  width: "100%",
-	  padding: "10px",
-	})
-	.attr('position', $("#arrange-area").children(".inst_line").length);
-
-  let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
-  add_button.click(((inst, id) => {
-    return function() {
-      addblock(inst, id)
-    }
-  })(inst,id))
-  div.append(add_button);
-  arrange_area.append(div);
-
-  let line_dict = {
-	  "inst": inst,
-	  "pos": arrange_data.length + 1,
-	  "blocks": []
-	};
-  arrange_data.push(line_dict);
-  track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>')
-  $('#track-list').append(track_header)
-
-}
-
-
-function addblock(inst, id) {
-  let arrange_area = $("#arrange-area");
-  let inst_area = $('#'+id);
-
-  let class_name = "block_" + inst;
-  var index = $('.'+class_name).length + 1;
-  let block = $('<div/>');
-  let block_id = inst + index.toString();
-  block.addClass(class_name)
-	.addClass('inst_block')
-	.css({
-	    height: "100px",
-	    width: "100px",
-	    display: "inline-flex",
-            position: "relative",
-            "border-radius": "10px"
-        })
-	.attr('id', block_id)
-        .attr('position', index)
-	.attr('inst', inst)
-	.attr('length', 1)
-//  block.resizable({grid: [ 100 ], maxHeight: 100, minHeight: 100});
-
-  block.click(function() {
-    $( this ).css({
-	border: "2px solid #d0d0d0"
-    });
-    $('.inst_block').not(this).css({
-	border: "none"
-    });
-  });
-
-  block.dblclick(function() {
-    loadModal($(this))
-    $('#exampleModalCenter').modal('show');
-  });
-
-  let length_dropdown = $('<div/>').addClass('dropdown')
-        .addClass('length-dropdown')
-        .css(
-          {
-            "bottom": "20px",
-            "right": "17px",
-            "position": "absolute"
-          }
-        )
+function generateBlockLengthDropdown() {
+  let length_dropdown = $('<div/>').addClass('dropdown').addClass('block-length-dropdown')
 
   let length_button = $('<div/>')
-	.css(
-          {
-            "height": "15px",
-            "width": "15px",
-            "margin-left": "auto",
-            "position": "absolute",
-            "background": "url(https://static.soundtrap.com/studio/assets/images/studio/rh_end.png) no-repeat"
-          }
-        )
+        .addClass('block-length-dropdown-toggle') 
 	.attr('data-toggle', 'dropdown')
 
   length_dropdown.append(length_button)
   let dropdown_menu = $('<div/>').addClass('dropdown-menu')
-  length_options = ['1/16', '1/8', '1/4', '1/2', '1']
-  let dropdown_items = generateDropdownItems(length_options)
+  let dropdown_items = generateDropdownItems(block_length_options)
   dropdown_items.forEach(
     (item) => {
       dropdown_menu.append(item)
     }
   )
   length_dropdown.append(dropdown_menu)
-  block.append(length_dropdown)
-  
+
+  return(length_dropdown)
+}
+
+function addLine(inst) {
+  let arrange_area = $("#arrange-area");
+  let div = $('<div/>');
+  let index = $('.'+inst+'-line').length
+  let id = inst+'-'+index.toString()
+  div.attr('id', id)
+	.addClass("inst-line")
+	.addClass(inst+'-line')
+	.attr('position', $("#arrange-area").children(".inst-line").length);
+
+  let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
+  add_button.click(((inst, id) => {
+    return function() {
+      addblock(inst, id, false)
+    }
+  })(inst,id))
+  div.append(add_button);
+  arrange_area.append(div);
+
   var color = null;
   switch (inst) {
     case "guitar":
@@ -158,24 +90,88 @@ function addblock(inst, id) {
       break;
   }
 
-  block.css({backgroundColor: color});
 
-  inst_area.append(block);
+  let line_index = arrange_data.length;
+  let line_dict = {
+	  "inst": inst,
+	  "pos": line_index,
+	  "blocks": [],
+          "color": color
+	};
+  arrange_data.push(line_dict);
+  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_index+1, 'grid-row-end': line_index+2});
+  $('#track-list-grid').append(track_header)
 
-  block = $('#' + block_id)
-  line_index = parseInt(block.parent('.inst_line').attr("position"));
+}
+
+
+function addblock(inst, id, from_load, arrange_area_data=false) {
+  let arrange_area = $("#arrange-area");
+  let inst_line = $('#'+id);
+  line_index = inst_line.attr("position");
+
+  let class_name = "block_" + inst;
+  var index = inst_line.children('.'+class_name).length;
+  let block = $('<div/>');
+  let block_id = id + '-' + index.toString();
+  block.addClass(class_name)
+	.addClass('inst-block')
+	.attr('id', block_id)
+        .attr('position', index)
+	.attr('inst', inst)
+	.attr('length', 1)
+//  block.resizable({grid: [ 100 ], maxHeight: 100, minHeight: 100});
+
+  block.click(function() {
+    $( this ).css({
+	border: "2px solid #d0d0d0"
+    });
+    $('.inst-block').not(this).css({
+	border: "none"
+    });
+    selected_block = $(this);
+  });
+
+  block.dblclick(function() {
+    loadModal($(this))
+    $('#exampleModalCenter').modal('show');
+  });
+
+  let length_dropdown = generateBlockLengthDropdown();
+  block.append(length_dropdown);
+
+  let line_obj = null;
+  if (arrange_area_data) {
+    line_obj = arrange_area_data[line_index];
+  }
+  else {
+    line_obj = arrange_data[line_index];    
+  }
+  block.css({backgroundColor: line_obj['color']});
+
+  if (from_load) {
+    let sound = line_obj['blocks'][index]['sound'];
+    block.attr('sound', sound);
+    block.append($('<div/>').addClass('block-label').text(sound))
+  }
+
+  inst_line.append(block);
+
+  if (!from_load) {
+    block = $('#' + block_id)
   
-  let block_obj = {}
+    let block_obj = {}
 
-  block_obj["name"] = inst + index.toString();
-  block_obj["length"] = 1;
+    block_obj["name"] = inst + index.toString();
+    block_obj["length"] = 1;
   
-  let notes_modal = $(".modal-body")
-  loadModal(block)
+    let notes_modal = $(".modal-body")
+    loadModal(block)
 
-  $('#exampleModalCenter').modal('show');
+    $('#exampleModalCenter').modal('show');
   
-  arrange_data[line_index]["blocks"].push(block_obj);
+    line_obj["blocks"].push(block_obj);
+  }
 }
 
 
@@ -183,7 +179,7 @@ function loadModal(block) {
   // Clear the modal
   $(".modal-body").html('')
 
-  line_index = parseInt(block.parent('.inst_line').attr("position"));
+  let line_index = parseInt(block.parent('.inst-line').attr("position"));
   let sounds = fileList[block.attr('inst')]
 
   // Create tabs for choosing sound in modal
@@ -246,9 +242,9 @@ function loadModal(block) {
           return(
             function() {
               block.attr("sound", $(this).attr("value"))
-              block.find('.label').remove()
-              block.append($('<div/>').text($(this).attr("value")).css({"align-self":"center", "margin-left":"auto", "margin-right":"auto"}).addClass('label'))
-              arrange_data[line_index]["blocks"][parseInt(block.attr('position'))-1]["sound"] = $(this).attr("value")
+              block.find('.block-label').remove()
+              block.append($('<div/>').text($(this).attr("value")).addClass('block-label'))
+              arrange_data[line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value")
             }
           )
         })(block)
@@ -256,3 +252,17 @@ function loadModal(block) {
     }
   );
 }
+
+$(document).ready(function(){
+  loadProject('[{"inst":"piano","pos":0,"blocks":[{"name":"piano0","length":1,"sound":"notes/A"}],"color":"pink"},{"inst":"guitar","pos":1,"blocks":[{"name":"guitar0","length":1,"sound":"chords/C"},{"name":"guitar1","length":1,"sound":"chords/F"}],"color":"lightgreen"}]');
+  init();
+  $(this).keydown(function(e) {
+    if(e.which == 8) {
+      e.preventDefault();
+      let line_pos = parseInt(selected_block.parent('.inst-line').attr('position'));
+      let block_pos = parseInt(selected_block.attr('position'));
+      arrange_data[line_pos]['blocks'].splice(block_pos, 1);
+      selected_block.remove();
+    }
+  });
+})

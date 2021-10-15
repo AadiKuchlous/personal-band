@@ -32,7 +32,6 @@ var position = 0;
 
 function playSequence() {
   eighthNoteTime = (60 / tempo) / 2;  
-  console.log(bufferlist);
   let cur_time = context.currentTime;
 
   for (i = 0; i < arrange_data.length; i++){
