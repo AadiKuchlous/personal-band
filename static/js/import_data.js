@@ -1,15 +1,19 @@
 function loadProject(data_string) {
-  // Remove all existing elements
-  $('.track-header').remove();
-  $('#arrange-area').children().remove();
-
   // Parse the json string
   let load_arrange_data = JSON.parse(data_string);
-  arrange_data = load_arrange_data
+  arrange_data = load_arrange_data;
 
-  for (i = 0; i < arrange_data.length; i++){
+  // Session metadata
+  tempo = arrange_data['tempo'];
+  $('#tempo-span').text(tempo);
+
+  // Remove all existing elements
+  $('.track-header').remove();
+  $('#arrange-area').children().remove('.inst-line');
+
+  for (i = 0; i < arrange_data['lines'].length; i++){
     let line_index = i;
-    let line_data = arrange_data[i];
+    let line_data = arrange_data['lines'][i];
     let inst = line_data.inst
     let pos = line_data.pos
 
@@ -26,7 +30,7 @@ function loadProject(data_string) {
 			       .css({'order':pos});
     $('#arrange-area').append(line_cont)
 
-    // Add blocks
+    // Add add-blocks button
     let add_block_div = $('<div/>').addClass('add-block').append($('<img/>').attr('src', "https://img.icons8.com/ios-glyphs/30/000000/plus-math.png"))
     add_block_div.click(((inst, id) => {
       return function() {
@@ -35,10 +39,15 @@ function loadProject(data_string) {
     })(inst, line_id))
     line_cont.append(add_block_div)
 
+    //Add the blocks
     let blocks = line_data['blocks'];
     for (j = 0; j < blocks.length; j++) {
       let block = blocks[j];
-      addblock(inst, line_id, true, load_arrange_data);
+      addblock(inst, line_id, true);
     }
+
+    //Draw the grid
+    $('#grid-canvas').attr('height', $('#arrange-area').children('.inst-line').length*120 + 'px');
+    drawGrid('grid-canvas', 25);
   }
 }

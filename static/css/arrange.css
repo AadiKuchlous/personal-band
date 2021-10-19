@@ -37,19 +37,25 @@
 .inst-block { 
   border: none;
   height: 100px;
-  width: 100px;
+  width: auto;
   display: inline-flex;
   position: relative;
   border-radius: 10px;
 }
 
+.block-selected{
+  border: 2px solid rgb(208, 208, 208);
+}
+
 .inst-line {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(100, 25px);
   align-items: center;
   height: 120px;
-  padding: 10px;
+  border-bottom: 1px solid rgb(0 0 255 / 25%);
+  border-top: 1px solid rgb(0 0 255 / 25%);
+  width: 100%;
+  position: relative;
 }
 
 button.col-5 {
@@ -75,7 +81,7 @@ button.col-5 {
 }
 
 #control-bar {
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 100;
@@ -94,6 +100,7 @@ button.col-5 {
   height: 100vh;
   position: relative;
   background-color: #f5f5f5;
+  width: 5000px;
 }
 
 #track-list {
@@ -117,7 +124,6 @@ button.col-5 {
   top: 0px;
   left: 0px;
   padding-left: 200px;
-  height: 100%;
   width: 100%;
   background: #f5f5f5;
 }
@@ -153,4 +159,12 @@ button.col-5 {
   align-self: center;
   margin-left: auto;
   margin-right: auto;
+}
+
+#grid-canvas {
+  position: absolute;
+}
+
+#tempo-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
 }

@@ -6,21 +6,27 @@ function play_line(line, line_start_time, index){
   let inst = line["inst"];
   let blocks = line["blocks"];
   let prev_time = line_start_time;
-  for (var i = 0; i < blocks.length; i++){
+  let instrument_tree = bufferlist[inst];
+  for (var i = 0; i < blocks.length; i++) {
     block = blocks[i];
-    let buffer = bufferlist[inst];
-    levels = block['sound'].split('/')
+    levels = block['sound'].split('/');
+    let buffer = instrument_tree;
+    // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
+    // path in this tree. Example: 'Notes/A'
     for (level = 0; level < levels.length; level++) {
-      key = levels[level]
-      buffer = buffer[key]
+      key = levels[level];
+      buffer = buffer[key];
     }
 
+//    console.log("Block:" + i + " currentTime: " + context.currentTime)
     if (i==0) {
-      playSound(buffer, line_start_time);
+      let end_time = line_start_time + eighthNoteTime * 2 * block["length"];
+      playSound(buffer, line_start_time, end_time);
     }
     else {
       let start_time = prev_time + eighthNoteTime * 2 * blocks[i-1]["length"];
-      playSound(buffer, start_time);
+      let end_time = start_time + eighthNoteTime * 2 * block["length"];
+      playSound(buffer, start_time, end_time);
       prev_time = start_time;
     }
   }
@@ -34,17 +40,28 @@ function playSequence() {
   eighthNoteTime = (60 / tempo) / 2;  
   let cur_time = context.currentTime;
 
-  for (i = 0; i < arrange_data.length; i++){
-    let line = arrange_data[i];
+  for (i = 0; i < arrange_data['lines'].length; i++){
+    let line = arrange_data['lines'][i];
     play_line(line, cur_time, i);
   }
 }
 
-function playSound(buffer, time) {
-  var source = context.createBufferSource();
+function playSound(buffer, time, end_time) {
+//  console.log("start: " + time, "end: " + end_time)
+
+  let source = context.createBufferSource();
+  let gainNode = context.createGain();
+  gainNode.gain.value = 1;
   source.buffer = buffer;
-  source.connect(context.destination);
+  source.connect(gainNode);
+//  visualiseData(source, gainNode, $('#visualise-canvas'));
+  gainNode.connect(context.destination);
+  
+  gainNode.gain.setValueCurveAtTime([1, 0.3, 0], end_time, 0.1);
+//  console.log("current in_Play: " + context.currentTime)
+
   source.start(time);
+  source.stop(end_time+0.1);
 }
 
 function pauseSound() {
@@ -75,7 +92,7 @@ $(document).ready(function(){
 
   $('#tempo-input').hide()
   $('#tempo-span').click(function(){
-    $('#tempo-input').show().focus().select().attr('value', $(this).text())
+    $('#tempo-input').show().focus().select().attr('value', $(this).text()).width($('#tempo-span').width())
     $(this).hide()
   })
   $('#tempo-input').keyup(function(e){
@@ -87,6 +104,7 @@ $(document).ready(function(){
       $(this).hide()
       tempo = $(this).val()
       $('#tempo-span').show().text(tempo)
+      arrange_data['tempo'] = tempo;
     })
 
 })

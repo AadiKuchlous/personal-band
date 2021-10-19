@@ -7,7 +7,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js" crossorigin="anonymous"></script>
 
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
@@ -20,6 +20,7 @@
 <script src="{{url_for('static', filename='js/audio.js')}}"></script>
 <script src="{{url_for('static', filename='js/arrange.js')}}"></script>
 <script src="{{url_for('static', filename='js/import_data.js')}}"></script>
+<script src="{{url_for('static', filename='js/visualise.js')}}"></script>
 
 <link rel="icon" 
       type="image/png" 
@@ -50,6 +51,10 @@
   <span class="hidden"><span>Tempo</span></span>
 </div>
 
+<!--
+<canvas id='visualise-canvas'></canvas>
+-->
+
 </div>
 
 
@@ -73,7 +78,9 @@
 </div>
 </div>
 
-<div id="arrange-area" style:"display:flex; flex-direction:row"></div>
+<div id="arrange-area" style:"display:flex; flex-direction:row">
+  <canvas id="grid-canvas"></canvas>
+</div>
 
 </div>
 

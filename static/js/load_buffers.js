@@ -91,7 +91,23 @@ const fileList = {
 		"Bm": "Bmin.wav",
 
             }
-        }
+        },
+	"drums": {
+	    "kick": {
+		"Kick 1": "kick1.wav",
+		"Kick 2": "kick2.wav"
+	    },
+	    "snare": {
+		"Snare 1": "snare1.wav",
+		"Snare 2": "snare2.wav"
+	    },
+	    "hihat": {
+		"Hihat Closed 1": "hatclosed1.wav",
+		"Hihat Open 1": "hatopen1.wav",
+		"Hihat Closed 2": "hatclosed2.wav",
+		"Hihat Open 2": "hatopen2.wav"
+	    }
+	}
 }
 
 const audio_location = "/static/audio_files"
