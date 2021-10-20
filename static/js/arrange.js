@@ -363,6 +363,9 @@ function drawGrid(canvas_id, grid_width){
     context.beginPath();
     context.strokeStyle = 'lightgray';
     context.lineWidth = 1;
+    if (x % 8 == 0) {
+      context.strokeStyle = '#999999';
+    }
     context.moveTo(x, 0);
     context.lineTo(x, height);
     context.stroke();
