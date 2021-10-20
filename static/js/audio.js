@@ -53,6 +53,10 @@ function playSequence(start_time) {
 }
 
 function play () {
+  if (playing) {
+    pauseSound();
+  }
+  
   playing = true;
   eighthNoteTime = (60 / tempo) / 2;
   let cur_time = context.currentTime;
@@ -106,12 +110,7 @@ $(document).ready(function(){
         e.stopPropagation();
         e.preventDefault();
       }
-      if (playing) {
-        pauseSound();
-      }
-      else {
-        play();
-      }
+      play();
     }
   })
 
