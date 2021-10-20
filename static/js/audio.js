@@ -1,5 +1,6 @@
 var tempo = 120; // BPM (beats per minute)
 var eighthNoteTime;
+var seqInterval;
 
 function play_line(line, line_start_time, index){
 
@@ -7,6 +8,7 @@ function play_line(line, line_start_time, index){
   let blocks = line["blocks"];
   let prev_time = line_start_time;
   let instrument_tree = bufferlist[inst];
+  let end_time = 0;
   for (var i = 0; i < blocks.length; i++) {
     block = blocks[i];
     levels = block['sound'].split('/');
@@ -20,30 +22,44 @@ function play_line(line, line_start_time, index){
 
 //    console.log("Block:" + i + " currentTime: " + context.currentTime)
     if (i==0) {
-      let end_time = line_start_time + eighthNoteTime * 2 * block["length"];
+      end_time = line_start_time + eighthNoteTime * 2 * block["length"];
       playSound(buffer, line_start_time, end_time);
     }
     else {
       let start_time = prev_time + eighthNoteTime * 2 * blocks[i-1]["length"];
-      let end_time = start_time + eighthNoteTime * 2 * block["length"];
+      end_time = start_time + eighthNoteTime * 2 * block["length"];
       playSound(buffer, start_time, end_time);
       prev_time = start_time;
     }
   }
+  return(end_time - line_start_time)
 }
 
 var audioBuffer = null;
 var playing = false;
 var position = 0;
+var loop = true;
 
-function playSequence() {
-  eighthNoteTime = (60 / tempo) / 2;  
-  let cur_time = context.currentTime;
-
+function playSequence(start_time) {
+  let seq_length = 0;
   for (i = 0; i < arrange_data['lines'].length; i++){
     let line = arrange_data['lines'][i];
-    play_line(line, cur_time, i);
+    let length = play_line(line, start_time, i);
+    if (length > seq_length) {
+      seq_length = length;
+    }
   }
+  return(seq_length)
+}
+
+function play () {
+  playing = true;
+  eighthNoteTime = (60 / tempo) / 2;
+  let cur_time = context.currentTime;
+
+  let length = playSequence(cur_time) * 1000;
+  seqInterval = setInterval(() => {  playSequence(context.currentTime); }, length);
+  setTimeout(() => {  clearInterval(seqInterval); seqInterval = null; playing = false;}, length*4);
 }
 
 function playSound(buffer, time, end_time) {
@@ -65,8 +81,13 @@ function playSound(buffer, time, end_time) {
 }
 
 function pauseSound() {
+  playing = false;
   context.close();
   context = new AudioContext();
+  if (seqInterval) {
+    clearInterval(seqInterval);
+    seqInterval = null;
+  }
 }
 
 
@@ -85,7 +106,12 @@ $(document).ready(function(){
         e.stopPropagation();
         e.preventDefault();
       }
-      playSequence()
+      if (playing) {
+        pauseSound();
+      }
+      else {
+        play();
+      }
     }
   })
 

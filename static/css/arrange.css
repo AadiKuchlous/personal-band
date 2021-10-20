@@ -168,3 +168,9 @@ button.col-5 {
 #tempo-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
+
+#load-project {
+  margin-right: 20px;
+  position: absolute;
+  right: 0px;
+}

@@ -4,7 +4,6 @@ let selected_block = null;
 let quarter_note_block_width = 100;
 
 $(document).ready(function(){
-//  loadProject('{"lines":[{"inst":"piano","pos":0,"blocks":[{"name":"piano0","length":1,"sound":"notes/A"}],"color":"pink"},{"inst":"guitar","pos":1,"blocks":[{"name":"guitar0","length":1,"sound":"chords/C"},{"name":"guitar1","length":1,"sound":"chords/F"}],"color":"lightgreen"}]}');
   init();
   $(this).keydown(function(e) {
     if(e.which == 8) {
@@ -18,6 +17,8 @@ $(document).ready(function(){
   $('#grid-canvas').attr('width', '5000px');
   $('#studio-body').css({'padding-top': $('#control-bar').height()});
   $('#arrange-area').css({'padding-top': $('#control-bar').height()});
+
+  $('#load-project').click((() => {loadProject(sample_project)}));
 })
 
 function capitalize(word) {
@@ -146,6 +147,9 @@ function addLine(inst) {
     case "piano":
       color = "pink";
       break;
+    case "drums":
+      color = "#44bcad";
+      break;
   }
 
 
@@ -238,7 +242,8 @@ function addblock(inst, id, from_load) {
   if (from_load) {
     let sound = line_obj['blocks'][index]['sound'];
     block.attr('sound', sound);
-    block.append($('<div/>').addClass('block-label').text(sound))
+//    block.append($('<div/>').addClass('block-label').text(sound))
+    block.attr('title', sound)
   }
 
   inst_line.append(block);

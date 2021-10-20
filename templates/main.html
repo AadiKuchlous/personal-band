@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="{{url_for('static', filename='css/arrange.css')}}">
 
 <script src="{{url_for('static', filename='js/load_buffers.js')}}"></script>
+<script src="{{url_for('static', filename='js/projects.js')}}"></script>
 <script src="{{url_for('static', filename='js/audio.js')}}"></script>
 <script src="{{url_for('static', filename='js/arrange.js')}}"></script>
 <script src="{{url_for('static', filename='js/import_data.js')}}"></script>
@@ -37,7 +38,7 @@
     </svg>
   </div>
 
-  <div class="playback-button" onclick="playSequence()">
+  <div class="playback-button" onclick="play()">
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
       width="48" height="48"
       viewBox="0 0 24 24" class="playback-button-svg"
@@ -51,6 +52,8 @@
   <span class="hidden"><span>Tempo</span></span>
 </div>
 
+
+<button class="btn btn-primary" id="load-project">Load Project</button>
 <!--
 <canvas id='visualise-canvas'></canvas>
 -->
@@ -71,7 +74,7 @@
 
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
     {% for inst in insts -%}
-      <button class="dropdown-item" onclick="addLine('{{inst}}')">{{inst}}</button>
+      <button class="dropdown-item" onclick="addLine('{{inst}}')">{{inst|capitalize}}</button>
     {%- endfor %}
   </div>
 </div>

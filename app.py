@@ -18,6 +18,3 @@ def hello():
       insts.append(str(inst_path).split('/')[-1])
 
   return render_template("main.html", insts = insts)
-
-if __name__ == "__main__":
-  app.run()
