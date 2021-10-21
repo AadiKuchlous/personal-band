@@ -375,10 +375,21 @@ function loadModal(block) {
         ((block) => {
           return(
             function() {
-              block.attr("sound", $(this).attr("value"))
-              block.find('.block-label').remove()
-              block.append($('<div/>').text($(this).attr("value")).addClass('block-label'))
-              arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value")
+              block.attr("sound", $(this).attr("value"));
+              block.find('.block-label').remove();
+              block.append($('<div/>').text($(this).attr("value")).addClass('block-label'));
+              arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
+
+              levels = block.attr('sound').split('/');
+              let instrument_tree = bufferlist[block.attr('inst')];
+              let buffer = instrument_tree;
+              // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
+              // path in this tree. Example: 'Notes/A'
+              for (level = 0; level < levels.length; level++) {
+                key = levels[level];
+                buffer = buffer[key];
+              }
+              playSound(buffer, context.currentTime, context.currentTime + 1000);
             }
           )
         })(block)
