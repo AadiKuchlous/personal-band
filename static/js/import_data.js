@@ -17,27 +17,9 @@ function loadProject(data_string) {
     let inst = line_data.inst
     let pos = line_data.pos
 
-    // Add track headers
-    let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': pos+1, 'grid-row-end': pos+2});
-    $('#track-list-grid').append(track_header);
-
     // Make intrument line
     let line_id = inst+'-'+(pos).toString();
-    let line_cont = $('<div/>').addClass('inst-line')
-			       .addClass(inst+'-line')
-			       .attr('id', line_id)
-			       .attr('position', pos)
-			       .css({'order':pos});
-    $('#arrange-area').append(line_cont)
-
-    // Add add-blocks button
-    let add_block_div = $('<div/>').addClass('add-block').append($('<img/>').attr('src', "https://img.icons8.com/ios-glyphs/30/000000/plus-math.png"))
-    add_block_div.click(((inst, id) => {
-      return function() {
-        addblock(inst, id, false)
-      }
-    })(inst, line_id))
-    line_cont.append(add_block_div)
+    let line_cont = addLine(inst, line_data);
 
     //Add the blocks
     let blocks = line_data['blocks'];

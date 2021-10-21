@@ -15,13 +15,12 @@ $(document).ready(function(){
     }
   });
 
-  $('#number-canvas').attr('width', '5000px').attr('height', '20px').css({'top': $('#number-canvas').height()*-1});
-  $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
-  $('#studio-body').css({'top': $('#control-bar').height()+$('#number-canvas').height()});
+  $('#number-canvas').attr('width', '5000px').attr('height', '20px');
+  $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'top': $('#number-canvas').height()});
+  $('#studio-body').css({'padding-top': $('#control-bar').height()});
+  $('#arrange-area').css({'padding-top': $('#control-bar').height()});
 
   $('#load-project').click((() => {loadProject(sample_project)}));
-
-  drawNumbers('number-canvas', 25);
 })
 
 function capitalize(word) {
@@ -118,23 +117,17 @@ function generateBlockLengthDropdown() {
   return(length_dropdown)
 }
 
-function addLine(inst, from_load=null) {
+function addLine(inst) {
   let arrange_area = $("#arrange-area");
-  let line = $('<div/>');
-  let index = 0;
-  if (from_load) {
-    index = from_load['pos']
-  }
-  else {
-    index = $('.'+inst+'-line').length;
-  }
+  let div = $('<div/>');
+  let index = $('.'+inst+'-line').length
   let id = inst+'-'+index.toString()
   let line_no = $("#arrange-area").children(".inst-line").length;
 
   $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
   drawGrid('grid-canvas', 25);
 
-  line.attr('id', id)
+  div.attr('id', id)
 	.addClass("inst-line")
 	.addClass(inst+'-line')
 	.attr('position', line_no);
@@ -145,16 +138,8 @@ function addLine(inst, from_load=null) {
       addblock(inst, id, false)
     }
   })(inst,id))
-  line.append(add_button);
-  line.hover( function (){
-	  $(this).find('.add-block').css({'display': 'flex'})
-	}, 
-	function (){
-	  $(this).find('.add-block').css({'display': 'none'})
-	}
-  );
-
-  arrange_area.append(line);
+  div.append(add_button);
+  arrange_area.append(div);
 
   var color = null;
   switch (inst) {
@@ -171,20 +156,15 @@ function addLine(inst, from_load=null) {
 
 
   let line_index = arrange_data['lines'].length;
-
-  if (!from_load) {
-    let line_dict = {
-	    "inst": inst,
-	    "pos": line_index,
-	    "blocks": [],
-            "color": color
-	  };
-    arrange_data['lines'].push(line_dict);
-  }
-  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': index+1, 'grid-row-end': index+2});
+  let line_dict = {
+	  "inst": inst,
+	  "pos": line_index,
+	  "blocks": [],
+          "color": color
+	};
+  arrange_data['lines'].push(line_dict);
+  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_index+1, 'grid-row-end': line_index+2});
   $('#track-list-grid').append(track_header)
-
-  return(line);
 }
 
 
@@ -265,7 +245,7 @@ function addblock(inst, id, from_load) {
 	.click(() => (deleteBlock(block)))
   );
 
-  block.hover( function (){
+  $('.inst-block').hover( function (){
 		  $(this).find('.block-del').css({'display': 'flex'})
 		}, 
 		function (){
@@ -390,22 +370,7 @@ function loadModal(block) {
 function deleteBlock(block) {
   let line_index = parseInt(block.parents('.inst-line').attr('position'));
   let block_index = parseInt(block.attr('position'));
-  let line_data = arrange_data['lines'][line_index];
-  let blocks = line_data['blocks'];
-  blocks.splice(block_index, 1);
-  for (i = block_index; i < blocks.length; i++) {
-    let this_block = blocks[i];
-    if (i == 0) {
-      this_block['grid-start'] = 1;
-    }
-    else {
-      let prev_block = blocks[i-1];
-      this_block['grid-start'] = prev_block['grid-end'];
-    }
-    this_block['grid-end'] = this_block['grid-start'] + (4 * this_block['length']);
-    console.log('end', this_block['grid-end'])
-  }
-  loadProject(JSON.stringify(arrange_data));
+  console.log(arrange_data['lines'][line_index]['blocks'][block_index])
 //  block.remove();
 }
 
@@ -423,39 +388,11 @@ function drawGrid(canvas_id, grid_width){
     if (x % 16 == 0) {
       context.strokeStyle = '#999999';
     }
-    else if (x % 8 == 0) {
-      context.strokeStyle = '#bbbbbb';
-    }
+//    else if (x % 8 == 0) {
+//      context.strokeStyle = '#a5a5a5';
+//    }
     context.moveTo(x, 0);
     context.lineTo(x, height);
     context.stroke();
   }
 }
-
-function drawNumbers(canvas_id, grid_width){
-  let canvas = $('#' + canvas_id);
-
-  let height = canvas.height();
-  let width = canvas.width();
-
-  for (var x = 0; x <= width; x += grid_width) {
-    let context = canvas[0].getContext('2d');
-    context.beginPath();
-    context.strokeStyle = 'lightgray';
-    context.lineWidth = 1;
-    context.font = '15px serif';
-    if (x % 16 == 0 || x == 0) {
-      context.strokeStyle = '#999999';
-      context.moveTo(x, 0);
-      context.lineTo(x, height);
-      context.fillText((x / (16*grid_width) + 1).toString(), x + 3, height-5);
-    }
-    else if (x % 8 == 0) {
-      context.strokeStyle = '#bbbbbb';
-      context.moveTo(x, height/2);
-      context.lineTo(x, height);
-    }
-    context.stroke();
-  }
-}
-
