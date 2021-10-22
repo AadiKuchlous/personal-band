@@ -507,6 +507,11 @@ function drawNumbers(canvas_id, grid_width){
       context.moveTo(x, height/2);
       context.lineTo(x, height);
     }
+    else if (x % 4 == 0) {
+      context.strokeStyle = '#bbbbbb';
+      context.moveTo(x, height*2/3);
+      context.lineTo(x, height);
+    }
     context.stroke();
   }
 }
