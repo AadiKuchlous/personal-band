@@ -2,6 +2,8 @@ let arrange_data = {'lines':[]};
 let block_length_options = ['1/16', '1/8', '1/4', '1/2', '1']
 let selected_block = null;
 let quarter_note_block_width = 100;
+let theme = "dark";
+let theme_obj = themes[theme];
 
 $(document).ready(function(){
   init();
@@ -20,8 +22,6 @@ $(document).ready(function(){
   $('#studio-body').css({'top': $('#control-bar').height()+$('#number-canvas').height()});
 
   $('#load-project').click((() => {loadProject(sample_project)}));
-
-  drawNumbers('number-canvas', 25);
 
   $('.tempo-change').on("click", (e) => {
     let clicked = $(e.target);
@@ -45,6 +45,15 @@ $(document).ready(function(){
 	}
   );
 
+  $('#SettingsButton').click(loadSettings);
+
+  $('#themeSelector').change(function() {
+    theme = $("input[name='theme']:checked").val();
+    theme_obj = themes[theme];
+    changeTheme();
+  })
+
+  changeTheme();
 })
 
 function capitalize(word) {
@@ -182,13 +191,13 @@ function addLine(inst, from_load=null) {
   var color = null;
   switch (inst) {
     case "guitar":
-      color = "#44D62C";
+      color = "blue";
       break;
     case "piano":
-      color = "#DB3EB1";
+      color = "green";
       break;
     case "drums":
-      color = "#4D4DFF";
+      color = "pink";
       break;
   }
 
@@ -205,7 +214,17 @@ function addLine(inst, from_load=null) {
 	  };
     arrange_data['lines'].push(line_dict);
   }
-  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_no+1, 'grid-row-end': line_no+2}).attr('index', line_no);
+  let track_header = $('<div/>')
+	.addClass('track-header')
+	.html('<b>'+capitalize(inst)+'</b>')
+	.css(
+	  {
+	    'grid-row-start': line_no+1,
+	    'grid-row-end': line_no+2,
+	    'color': theme_obj['text-color']
+	  }
+	)
+	.attr('index', line_no);
 
   let volume_knob = $('<input/>').attr('type', 'range').attr('max', '100').attr('min', '0').attr('value', '50');
   volume_knob.attr('value', arrange_data['lines'][line_no]['volume']);
@@ -285,8 +304,8 @@ function addblock(inst, id, from_load) {
   });
 
   block.dblclick(function() {
-    loadModal($(this))
-    $('#exampleModalCenter').modal('show');
+    loadNoteModal($(this))
+    $('#noteModal').modal('show');
   });
 
   let length_dropdown = generateBlockLengthDropdown();
@@ -307,7 +326,8 @@ function addblock(inst, id, from_load) {
 		}
 	);
 
-  block.css({backgroundColor: line_obj['color']});
+  block.css({backgroundColor: theme_obj['block-'+line_obj['color']]});
+  block.css({'box-shadow': '0 0 20px ' + theme_obj['block-'+line_obj['color']+'-highlight'] });
 
   if (from_load) {
     let sound = line_obj['blocks'][index]['sound'];
@@ -324,23 +344,25 @@ function addblock(inst, id, from_load) {
     block_obj["name"] = inst + index.toString();
     block_obj["length"] = 1;
   
-    let notes_modal = $(".modal-body")
-    loadModal(block)
+    let notes_modal = $("#noteModal .modal-body")
+    loadNoteModal(block);
 
-    $('#exampleModalCenter').modal('show');
+    $('#noteModal').modal('show');
   
     line_obj["blocks"].push(block_obj);
   }
 }
 
 
-function loadModal(block) {
+function loadNoteModal(block) {
+  let modal_body = $("#noteModal .modal-body");
+  let modal_title = $("#noteModalTitle");
   // Clear the modal
-  $(".modal-body").html('')
+  modal_body.html('')
 
-  $(".modal-body").attr('inst', block.attr('inst'));
+  modal_body.attr('inst', block.attr('inst'));
 
-  $(".modal-title").html(capitalize(block.attr('inst')));
+  modal_title.html(capitalize(block.attr('inst')));
 
   let line_index = parseInt(block.parent('.inst-line').attr("position"));
   let sounds = fileList[block.attr('inst')]
@@ -382,6 +404,7 @@ function loadModal(block) {
 				 .attr('value', section+'/'+sound)
 				 .html(sound)
 				 .addClass('note-button')
+				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color']})
       if (Number.isInteger((index+1)/2)) {
         button.addClass('align-self-end')
       }
@@ -401,10 +424,10 @@ function loadModal(block) {
   $(nav_div.children()[0]).find('button').addClass('active');
   $(tab_content.children()[0]).addClass("show").addClass('active');
   // nav.append(nav_div)
-  $(".modal-body").append(nav_div)
-  $(".modal-body").append(tab_content)
+  modal_body.append(nav_div)
+  modal_body.append(tab_content)
   
-  $(".modal-body").find(".note-button").each(
+  modal_body.find(".note-button").each(
     function() {
       $(this).off('click');
       $(this).click(
@@ -432,8 +455,8 @@ function loadModal(block) {
           return(
             function() {
               levels = $(this).parent().attr('value').split('/');
-              console.log(bufferlist, $('modal-body').attr('inst'));
-              let instrument_tree = bufferlist[$('.modal-body').attr('inst')];
+              console.log(bufferlist, modal_body.attr('inst'));
+              let instrument_tree = bufferlist[modal_body.attr('inst')];
               let buffer = instrument_tree;
               // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
               // path in this tree. Example: 'Notes/A'
@@ -510,6 +533,7 @@ function drawNumbers(canvas_id, grid_width){
       context.strokeStyle = '#999999';
       context.moveTo(x, 0);
       context.lineTo(x, height);
+      context.fillStyle = theme_obj['text-color'];
       context.fillText((x / (16*grid_width) + 1).toString(), x + 3, height-5);
     }
     else if (x % 8 == 0) {
@@ -526,3 +550,37 @@ function drawNumbers(canvas_id, grid_width){
   }
 }
 
+function loadSettings() {
+  $('#settingsModal').modal('show');
+}
+
+function changeTheme() {
+  $('#control-bar').css({'background-color': theme_obj['control-bar-background']});
+  $('#studio-body').css({'background-color': theme_obj['studio-background']});
+  $('#track-list').css({'background-color': theme_obj['studio-background']});
+  $('#arrange-area').css({'background-color': theme_obj['studio-background']});
+  $('#number-canvas').css({'background-color': theme_obj['studio-background']});
+  $('body').css({'background-color': theme_obj['studio-background']});
+  $('.inst-block').each(function() {
+    let color = arrange_data['lines'][parseInt($(this).parents('.inst-line').attr('position'))]['color'];
+    $(this).css({'background-color': theme_obj['block-'+color]});
+
+    let box_shadow = theme_obj['block-'+color+'-highlight'] + ' ' + theme_obj['block-box-shadow'];
+    console.log(box_shadow);
+    $(this).css({'box-shadow': 'none'});
+    $(this).css({'box-shadow': box_shadow.toString()});
+  })
+  $('.track-header').css({'color': theme_obj['track-text-color']});
+  $('#dropdownMenuButton').css({'color': theme_obj['track-text-color']});
+  $('.note-button').css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color']})
+  $('#dropdownMenuButton').css({'background': theme_obj['studio-background']});
+  $('#dropdownMenuButton').hover(function(){
+    $(this).css({'background': theme_obj['new-track-hover-color']});
+  }, function(){
+    $(this).css({'background': theme_obj['studio-background']});
+  });
+
+  $('.modal-content').css({'background-color': theme_obj['modal-background'], 'color': theme_obj['text-color']});
+  $('.tempo').css({'color': theme_obj['text-color']});
+  drawNumbers('number-canvas', 25);
+}
