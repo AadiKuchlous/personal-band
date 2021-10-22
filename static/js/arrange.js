@@ -191,10 +191,10 @@ function addLine(inst, from_load=null) {
   var color = null;
   switch (inst) {
     case "guitar":
-      color = "blue";
+      color = "green";
       break;
     case "piano":
-      color = "green";
+      color = "pink";
       break;
     case "drums":
       color = "pink";
