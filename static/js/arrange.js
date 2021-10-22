@@ -22,6 +22,29 @@ $(document).ready(function(){
   $('#load-project').click((() => {loadProject(sample_project)}));
 
   drawNumbers('number-canvas', 25);
+
+  $('.tempo-change').on("click", (e) => {
+    let clicked = $(e.target);
+    let tempo_span = $('#tempo-span');
+    let tempo_input = $('#tempo-input');
+    let increment = 1;
+    if (clicked.attr('value') == "plus") {
+      increment = 1;
+    }
+    else if (clicked.attr('value') == "minus") {
+      increment = -1;
+    }
+    tempo_span.text(parseInt(tempo_span.text()) + increment);
+    tempo_input.attr('value', tempo_span.text());
+  })
+  $('.tempo').hover( function (){
+	  $('#tempo-label').css({'display': 'flex'})
+	}, 
+	function (){
+	  $('#tempo-label').css({'display': 'none'})
+	}
+  );
+
 })
 
 function capitalize(word) {
@@ -181,7 +204,7 @@ function addLine(inst, from_load=null) {
 	  };
     arrange_data['lines'].push(line_dict);
   }
-  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': index+1, 'grid-row-end': index+2});
+  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_no+1, 'grid-row-end': line_no+2});
   $('#track-list-grid').append(track_header)
 
   return(line);
@@ -342,12 +365,9 @@ function loadModal(block) {
     let buttons_area = $('<div/>').addClass('row').addClass('justify-content-around')
 
     Object.entries(sounds[section]).forEach(function ([sound, file], index) {
-      let button = $('<button/>').addClass('col-5')
+      let button = $('<div/>').addClass('col-5')
 				 .attr('value', section+'/'+sound)
 				 .html(sound)
-				 .css({
-				   "height":"80px"
-				 })
 				 .addClass('note-button')
       if (Number.isInteger((index+1)/2)) {
         button.addClass('align-self-end')
@@ -355,6 +375,9 @@ function loadModal(block) {
       else {
         button.addClass('align-self-start')
       }
+
+      button.append($('<div>').addClass('note-listen').html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#000000"><path d="M107.45801,23.59961c-3.81482,-0.02636 -7.12468,3.16106 -7.12468,7.18066c0,3.16767 2.08371,6.02157 5.15104,6.80273c20.43844,5.20703 35.82348,22.73457 37.66699,44.09179c0.1229,1.42382 0.18197,2.86992 0.18197,4.3252c0,23.2845 -16.04796,42.86282 -37.84896,48.41699c-3.06733,0.78117 -5.15104,3.63507 -5.15104,6.80274c0,4.59383 4.3327,8.10303 8.79036,6.9707c27.90701,-7.08783 48.54297,-32.28393 48.54297,-62.19043c0,-29.9065 -20.63597,-55.1026 -48.54297,-62.19043c-0.5572,-0.14154 -1.12071,-0.2062 -1.66568,-0.20996zM79.61719,31.66211c-2.01815,-0.23721 -4.15778,0.37849 -5.85091,2.07161l-30.76628,30.76628h-14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v14.33333c0,7.91917 6.41417,14.33333 14.33333,14.33333h14.33333l30.76628,30.76628c4.515,4.515 12.23372,1.31844 12.23372,-5.06706v-94.39844c0,-3.99094 -3.01924,-6.74332 -6.38281,-7.13867zM107.22006,54.01595c-3.61201,0.13706 -6.88672,3.16341 -6.88672,7.19466v0.16797c0,2.52267 1.32684,4.87053 3.54134,6.08887c6.59333,3.6335 10.79199,10.56322 10.79199,18.53255c0,7.96933 -4.19866,14.89222 -10.79199,18.51855c-2.2145,1.21833 -3.54134,3.5802 -3.54134,6.10287v0.15397c0,5.38217 5.83938,8.986 10.51205,6.31283c10.89333,-6.22783 18.15462,-17.80839 18.15462,-31.08822c0,-13.27983 -7.26129,-24.85322 -18.15462,-31.08822c-1.16817,-0.6665 -2.42133,-0.94152 -3.62532,-0.89583z"></path></g></g></svg>'));
+
       buttons_area.append(button)
     })
 
@@ -368,7 +391,7 @@ function loadModal(block) {
   $(".modal-body").append(nav_div)
   $(".modal-body").append(tab_content)
   
-  $(".modal-body").find("button.note-button").each(
+  $(".modal-body").find(".note-button").each(
     function() {
       $(this).off('click');
       $(this).click(
@@ -377,7 +400,7 @@ function loadModal(block) {
             function() {
               block.attr("sound", $(this).attr("value"));
               block.find('.block-label').remove();
-              block.append($('<div/>').text($(this).attr("value")).addClass('block-label'));
+              block.append($('<div/>').text($(this).attr("value").split('/').at(-1)).addClass('block-label'));
               arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
 
               levels = block.attr('sound').split('/');
@@ -395,7 +418,6 @@ function loadModal(block) {
         })(block)
       )
     }
-  );
 }
 
 function deleteBlock(block) {
@@ -414,7 +436,6 @@ function deleteBlock(block) {
       this_block['grid-start'] = prev_block['grid-end'];
     }
     this_block['grid-end'] = this_block['grid-start'] + (4 * this_block['length']);
-    console.log('end', this_block['grid-end'])
   }
   loadProject(JSON.stringify(arrange_data));
 //  block.remove();
