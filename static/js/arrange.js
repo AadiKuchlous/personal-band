@@ -418,6 +418,7 @@ function loadModal(block) {
         })(block)
       )
     }
+  );
 }
 
 function deleteBlock(block) {
