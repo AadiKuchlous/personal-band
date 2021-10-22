@@ -25,7 +25,7 @@ function play_line(line, line_start_time, index, volume){
       playSound(buffer, line_start_time, end_time, volume);
     }
     else {
-      let start_time = prev_time + eighthNoteTime * 2 * blocks[i-1]["length"];
+      let start_time = line_start_time + eighthNoteTime * 0.5 * (block['grid-start'] - 1);
       end_time = start_time + eighthNoteTime * 2 * block["length"];
       playSound(buffer, start_time, end_time, volume);
       prev_time = start_time;
