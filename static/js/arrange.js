@@ -204,7 +204,16 @@ function addLine(inst, from_load=null) {
 	  };
     arrange_data['lines'].push(line_dict);
   }
-  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_no+1, 'grid-row-end': line_no+2});
+  let track_header = $('<div/>').addClass('track-header').html('<b>'+capitalize(inst)+'</b>').css({'grid-row-start': line_no+1, 'grid-row-end': line_no+2}).attr('index', line_no);
+
+  let volume_knob = $('<input/>').attr('type', 'range').attr('max', '100').attr('min', '0').attr('value', '50');
+  volume_knob.change(function (e) {
+    let slider = e.target;
+    let line_index = $(slider).parents('.track-header').attr('index')
+    arrange_data['lines'][line_index]['volume'] = slider.value;
+  })
+  track_header.append(volume_knob);
+
   $('#track-list-grid').append(track_header)
 
   return(line);
@@ -420,7 +429,6 @@ function loadModal(block) {
         (() => {
           return(
             function() {
-              console.log("play note")
               levels = $(this).parent().attr('value').split('/');
               console.log(bufferlist, $('modal-body').attr('inst'));
               let instrument_tree = bufferlist[$('.modal-body').attr('inst')];
@@ -431,7 +439,7 @@ function loadModal(block) {
                 key = levels[level];
                 buffer = buffer[key];
               }
-              playSound(buffer, context.currentTime, context.currentTime + 1000);
+              playSound(buffer, context.currentTime, context.currentTime + 1000, 1);
             }
           )
         })()

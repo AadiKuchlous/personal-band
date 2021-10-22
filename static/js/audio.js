@@ -2,7 +2,7 @@ var tempo = 120; // BPM (beats per minute)
 var eighthNoteTime;
 var seqInterval;
 
-function play_line(line, line_start_time, index){
+function play_line(line, line_start_time, index, volume){
 
   let inst = line["inst"];
   let blocks = line["blocks"];
@@ -20,15 +20,14 @@ function play_line(line, line_start_time, index){
       buffer = buffer[key];
     }
 
-//    console.log("Block:" + i + " currentTime: " + context.currentTime)
     if (i==0) {
       end_time = line_start_time + eighthNoteTime * 2 * block["length"];
-      playSound(buffer, line_start_time, end_time);
+      playSound(buffer, line_start_time, end_time, volume);
     }
     else {
       let start_time = prev_time + eighthNoteTime * 2 * blocks[i-1]["length"];
       end_time = start_time + eighthNoteTime * 2 * block["length"];
-      playSound(buffer, start_time, end_time);
+      playSound(buffer, start_time, end_time, volume);
       prev_time = start_time;
     }
   }
@@ -44,7 +43,8 @@ function playSequence(start_time) {
   let seq_length = 0;
   for (i = 0; i < arrange_data['lines'].length; i++){
     let line = arrange_data['lines'][i];
-    let length = play_line(line, start_time, i);
+    let volume = parseInt(line['volume']) / 100;
+    let length = play_line(line, start_time, i, volume);
     if (length > seq_length) {
       seq_length = length;
     }
@@ -66,19 +66,16 @@ function play () {
   setTimeout(() => {  clearInterval(seqInterval); seqInterval = null; playing = false;}, length*4);
 }
 
-function playSound(buffer, time, end_time) {
-//  console.log("start: " + time, "end: " + end_time)
-
+function playSound(buffer, time, end_time, volume) {
   let source = context.createBufferSource();
   let gainNode = context.createGain();
   gainNode.gain.value = 1;
   source.buffer = buffer;
   source.connect(gainNode);
-//  visualiseData(source, gainNode, $('#visualise-canvas'));
   gainNode.connect(context.destination);
-  
-  gainNode.gain.setValueCurveAtTime([1, 0.3, 0], end_time, 0.1);
-//  console.log("current in_Play: " + context.currentTime)
+  gainNode.gain.value = volume;
+  let fade_out_curve = [volume, volume*0.3, 0]
+  gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
 
   source.start(time);
   source.stop(end_time+0.1);
