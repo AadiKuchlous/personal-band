@@ -327,6 +327,8 @@ function loadModal(block) {
   // Clear the modal
   $(".modal-body").html('')
 
+  $(".modal-body").attr('inst', block.attr('inst'));
+
   $(".modal-title").html(capitalize(block.attr('inst')));
 
   let line_index = parseInt(block.parent('.inst-line').attr("position"));
@@ -397,14 +399,31 @@ function loadModal(block) {
       $(this).click(
         ((block) => {
           return(
-            function() {
-              block.attr("sound", $(this).attr("value"));
-              block.find('.block-label').remove();
-              block.append($('<div/>').text($(this).attr("value").split('/').at(-1)).addClass('block-label'));
-              arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
+            function(e) {
+              if (e.target == this) {
+                block.attr("sound", $(this).attr("value"));
+                block.find('.block-label').remove();
+                block.append($('<div/>').text($(this).attr("value").split('/').at(-1)).addClass('block-label'));
+                arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
+              }
+            }
+          )
+        })(block)
+      )
+    }
+  );
 
-              levels = block.attr('sound').split('/');
-              let instrument_tree = bufferlist[block.attr('inst')];
+  $('.note-listen').each(
+    function() {
+      $(this).off('click');
+      $(this).click(
+        (() => {
+          return(
+            function() {
+              console.log("play note")
+              levels = $(this).parent().attr('value').split('/');
+              console.log(bufferlist, $('modal-body').attr('inst'));
+              let instrument_tree = bufferlist[$('.modal-body').attr('inst')];
               let buffer = instrument_tree;
               // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
               // path in this tree. Example: 'Notes/A'
@@ -415,10 +434,10 @@ function loadModal(block) {
               playSound(buffer, context.currentTime, context.currentTime + 1000);
             }
           )
-        })(block)
+        })()
       )
     }
-  );
+  )
 }
 
 function deleteBlock(block) {
