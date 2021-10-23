@@ -60,7 +60,7 @@ function capitalize(word) {
   return word[0].toUpperCase() + word.slice(1).toLowerCase();
 }
 
-function generateDropdownItems(items) {
+function generateDropdownItems(items, block) {
   let dropdown_items = [];
   items.forEach(
     (item) => {
@@ -69,7 +69,8 @@ function generateDropdownItems(items) {
 	      .text(item)
 	      .attr('value', item)
 	      .off('click');
-      if (item == "1/4") {
+      console.log(parseFloat(item))
+      if (eval(item) == parseFloat(block.attr('length'))*0.25) {
           dropdown_item.addClass('active');
       }
 
@@ -130,7 +131,7 @@ function generateDropdownItems(items) {
   return(dropdown_items);
 }
 
-function generateBlockLengthDropdown() {
+function generateBlockLengthDropdown(block) {
   let length_dropdown = $('<div/>').addClass('dropdown').addClass('block-length-dropdown')
 
   let length_button = $('<div/>')
@@ -139,7 +140,7 @@ function generateBlockLengthDropdown() {
 
   length_dropdown.append(length_button)
   let dropdown_menu = $('<div/>').addClass('dropdown-menu')
-  let dropdown_items = generateDropdownItems(block_length_options)
+  let dropdown_items = generateDropdownItems(block_length_options, block)
   dropdown_items.forEach(
     (item) => {
       dropdown_menu.append(item)
@@ -327,7 +328,7 @@ function addblock(inst, id, from_load) {
     $('#noteModal').modal('show');
   });
 
-  let length_dropdown = generateBlockLengthDropdown();
+  let length_dropdown = generateBlockLengthDropdown(block);
   block.append(length_dropdown);
 
   block.append(
