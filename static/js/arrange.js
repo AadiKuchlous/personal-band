@@ -255,7 +255,25 @@ function addblock(inst, id, from_load) {
 	.addClass('inst-block')
 	.attr('id', block_id)
         .attr('position', index)
-	.attr('inst', inst);
+	.attr('inst', inst)
+	.draggable({
+		'axis':'x',
+		'grid': [25],
+		'containment': '.inst-line',
+		stop: function( event, ui ) {
+			console.log($(this).css('left'));
+			let displacement = $(this).css('left');
+			let grid_displacement = parseInt(displacement)/25;
+			let grid_start = parseInt($(this).css('grid-column-start')) + grid_displacement;
+			let grid_end = parseInt($(this).css('grid-column-end')) + grid_displacement;
+			$(this).css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
+			let line_pos = parseInt($(this).parent().attr('position'));
+			let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt($(this).attr('position'))];
+			block_obj['grid-start'] = grid_start;
+			block_obj['grid-end'] = grid_end;
+		},
+		'cursor': 'move'
+	})
 
   let line_obj = arrange_data['lines'][line_index];
   let block_data_obj = line_obj['blocks'][index];
@@ -290,7 +308,8 @@ function addblock(inst, id, from_load) {
     }
     let grid_column = grid_start + '/' + grid_end;
     block.css({
-        'grid-column': grid_column
+        'grid-column-start': grid_start,
+	'grid-column-end': grid_end
     });
   }
   block_obj['grid-start'] = grid_start;
