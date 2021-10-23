@@ -17,7 +17,7 @@ $(document).ready(function(){
     }
   });
 
-  $('#number-canvas').attr('width', '5000px').attr('height', '20px').css({'top': $('#number-canvas').height()*-1});
+  $('#number-canvas').attr('width', '50000px').attr('height', '20px').css({'top': $('#number-canvas').height()*-1});
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
   $('#studio-body').css({'top': $('#control-bar').height()+$('#number-canvas').height()});
 
