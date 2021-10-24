@@ -4,6 +4,11 @@ var seqInterval;
 
 function play_line(line, line_start_time, index, volume){
 
+  let offlineCtx = new OfflineAudioContext({
+    numberOfChannels: 2,
+    length: 44100 * 40,
+    sampleRate: 44100
+  });
   let inst = line["inst"];
   let blocks = line["blocks"];
   let prev_time = line_start_time;
@@ -22,15 +27,20 @@ function play_line(line, line_start_time, index, volume){
 
     if (i==0) {
       end_time = line_start_time + eighthNoteTime * 2 * block["length"];
-      playSound(buffer, line_start_time, end_time, volume);
+      loadOffline(buffer, line_start_time, end_time, volume, offlineCtx);
+//      playSound(buffer, line_start_time, end_time, volume);
     }
     else {
       let start_time = line_start_time + eighthNoteTime * 0.5 * (block['grid-start'] - 1);
       end_time = start_time + eighthNoteTime * 2 * block["length"];
-      playSound(buffer, start_time, end_time, volume);
+      loadOffline(buffer, start_time, end_time, volume, offlineCtx);
+//      playSound(buffer, start_time, end_time, volume);
       prev_time = start_time;
     }
   }
+  offlineCtx.startRendering().then(function(renderedBuffer) {
+    console.log(renderedBuffer);
+  });
   return(end_time - line_start_time)
 }
 
@@ -73,6 +83,21 @@ function playSound(buffer, time, end_time, volume) {
   source.buffer = buffer;
   source.connect(gainNode);
   gainNode.connect(context.destination);
+  gainNode.gain.value = volume;
+  let fade_out_curve = [volume, volume*0.3, 0]
+  gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
+
+  source.start(time);
+  source.stop(end_time+0.1);
+}
+
+function loadOffline(buffer, time, end_time, volume, ctx) {
+  let source = ctx.createBufferSource();
+  let gainNode = ctx.createGain();
+  gainNode.gain.value = 1;
+  source.buffer = buffer;
+  source.connect(gainNode);
+  gainNode.connect(ctx.destination);
   gainNode.gain.value = volume;
   let fade_out_curve = [volume, volume*0.3, 0]
   gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
