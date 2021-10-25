@@ -247,7 +247,6 @@ function serveDownload(buffer) {
   let url = window.URL.createObjectURL(blob);
   anchor.attr('href', url);
   anchor.attr('download', 'audio.wav');
-//  window.location.href = url;
+  waiting_for_download = false;
   anchor[0].click();
-//  window.URL.revokeObjectURL(url);
 }
