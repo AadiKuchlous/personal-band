@@ -26,7 +26,7 @@ var themes = {
     'block-green': '#7ed957',
     'block-pink': '#cb6ce6',
     'block-blue-highlight': '#a6f6e3',
-    'block-green-highlight': '#57d9b2',
+    'block-green-highlight': '#00ff89',
     'block-pink-highlight': '#db9ced',
     'note-select-button-color': '#323232',
     'new-track-hover-color': '#262626',
