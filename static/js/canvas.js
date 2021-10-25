@@ -114,18 +114,19 @@ function updatePlayheadPos() {
   let current_play_position = cur_time-play_start_time;
   if (current_play_position <= fullBuffer.duration - playhead_position * eighthNoteTime && playing) {
     let playhead = $('#playhead-canvas');
-    let new_pos = (playhead_position * quarter_note_block_width/2) + playhead_start_pos + (cur_time / eighthNoteTime) * quarter_note_block_width;
+    let new_pos = (playhead_position * quarter_note_block_width/2) + playhead_start_pos + (cur_time / eighthNoteTime) * quarter_note_block_width/2;
     playhead.css({'left': new_pos}); 
     window.requestAnimationFrame(updatePlayheadPos);
   }
   else {
-    roundPlayhead()
+    playhead_position = (parseFloat($('#playhead-canvas').css('left'))-192)/(quarter_note_block_width/2);
   }
   console.log(playhead_position)
 }
 
 
 function roundPlayhead() {
-  playhead_position = Math.round((parseFloat($('#playhead-canvas').css('left'))-192)/quarter_note_block_width/4)/2;
+  console.log('before_change: ' + playhead_position)
+  playhead_position = Math.round((parseFloat($('#playhead-canvas').css('left'))-192)/(quarter_note_block_width/4))/2;
   $('#playhead-canvas').css({'left': (playhead_position*quarter_note_block_width/2)+playhead_start_pos});
 }

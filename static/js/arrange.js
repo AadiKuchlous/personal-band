@@ -75,6 +75,11 @@ $(document).ready(function(){
 	'cursor': 'move'
   })
 
+  $('#playhead-canvas').mousedown((e) => {
+    e.preventDefault();
+    roundPlayhead();
+  })
+
   $('#download-wav').click(downloadWav);
 })
 

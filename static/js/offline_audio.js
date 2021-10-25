@@ -27,6 +27,7 @@ function newGlobalContext() {
 
 function stopSound() {
   playing = false;
+  playhead_position = 0;
   newGlobalContext();
   if (loopInterval) {
     clearInterval(loopInterval);
@@ -35,12 +36,14 @@ function stopSound() {
 }
 
 
-function play () {
-  if (playing) {
-    stopSound();
-  };
-
+function pause() {
+  playing = false;
+  newGlobalContext();
   playhead_position = 0;
+}
+
+
+function play () {
   eighthNoteTime = (60 / tempo) / 2;
   total_lines = 0;
   playing = true;
@@ -211,7 +214,12 @@ $(document).ready(function(){
         e.stopPropagation();
         e.preventDefault();
       }
-      play();
+      if (playing) {
+        pause();
+      }
+      else {
+        play();
+      }
     }
   })
 
