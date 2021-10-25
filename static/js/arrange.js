@@ -19,9 +19,11 @@ $(document).ready(function(){
     }
   });
 
-  $('#number-canvas').attr('width', '50000px').attr('height', '20px').css({'top': $('#number-canvas').height()*-1});
+  $('#number-canvas').attr('width', '50000px').attr('height', '32px').css({'top': $('#number-canvas').height()*-1});
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
   $('#studio-body').css({'top': $('#control-bar').height()+$('#number-canvas').height()});
+  $('#playhead-canvas').attr('width', $('#number-canvas').height()/2)
+	.attr('height', '0px');
 
   $('#load-project').click((() => {loadProject(sample_project)}));
 
@@ -59,6 +61,17 @@ $(document).ready(function(){
   })
 
   changeTheme();
+
+/*
+  drawPlayhead();
+  $('#playhead-canvas').draggable({
+	'axis':'x',
+	'grid': [25],
+	'containment': '.inst-line',
+//	stop: blockDragged,
+	'cursor': 'move'
+  })
+*/
 
   $('#download-wav').click(downloadWav);
 })
@@ -189,9 +202,6 @@ function addLine(inst, from_load=null) {
   let id = inst+'-'+index.toString()
   let line_no = $("#arrange-area").children(".inst-line").length;
 
-  $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
-  drawGrid('grid-canvas', 25);
-
   line.attr('id', id)
 	.addClass("inst-line")
 	.addClass(inst+'-line')
@@ -282,6 +292,16 @@ function addLine(inst, from_load=null) {
   $('#track-list-grid').append(track_header)
 
   $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
+
+  console.log('added header and line')
+
+  if (!grid_drawn){
+    $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
+    drawGrid('grid-canvas', 25);
+  }
+  else {
+    $('#grid-canvas').css({'width': $('#grid-canvas').attr('width'), 'height': ((line_no+1)*120) + 'px'})
+  }
 
   return(line);
 }
@@ -622,61 +642,6 @@ function findNewTotalLength() {
   arrange_data['length'] = length;
 }
 
-function drawGrid(canvas_id, grid_width){
-  let canvas = $('#' + canvas_id);
-
-  let height = canvas.height();
-  let width = canvas.width();
-
-  for (var x = 0; x <= width; x += grid_width) {
-    let context = canvas[0].getContext('2d');
-    context.beginPath();
-    context.strokeStyle = 'lightgray';
-    context.lineWidth = 1;
-    if (x % 16 == 0) {
-      context.strokeStyle = '#999999';
-    }
-    else if (x % 8 == 0) {
-      context.strokeStyle = '#bbbbbb';
-    }
-    context.moveTo(x, 0);
-    context.lineTo(x, height);
-    context.stroke();
-  }
-}
-
-function drawNumbers(canvas_id, grid_width){
-  let canvas = $('#' + canvas_id);
-
-  let height = canvas.height();
-  let width = canvas.width();
-
-  for (var x = 0; x <= width; x += grid_width) {
-    let context = canvas[0].getContext('2d');
-    context.beginPath();
-    context.strokeStyle = 'lightgray';
-    context.lineWidth = 1;
-    context.font = '15px serif';
-    if (x % 16 == 0 || x == 0) {
-      context.strokeStyle = '#999999';
-      context.moveTo(x, 0);
-      context.lineTo(x, height);
-      context.fillStyle = theme_obj['text-color'];
-      context.fillText((x / (16*grid_width) + 1).toString(), x + 3, height-5);
-    }
-    else if (x % 8 == 0) {
-      context.strokeStyle = '#bbbbbb';
-      context.moveTo(x, height/2);
-      context.lineTo(x, height);
-    }
-    else if (x % 4 == 0) {
-      context.strokeStyle = '#bbbbbb';
-      context.moveTo(x, height*2/3);
-      context.lineTo(x, height);
-    }
-    context.stroke();
-  }
-}
 
 function loadSettings() {
   $('#settingsModal').modal('show');

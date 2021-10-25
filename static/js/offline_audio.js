@@ -24,7 +24,7 @@ function newGlobalContext() {
   globalcontext = new AudioContext();
 }
 
-function pauseSound() {
+function stopSound() {
   playing = false;
   newGlobalContext();
   if (loopInterval) {
@@ -36,7 +36,7 @@ function pauseSound() {
 
 function play () {
   if (playing) {
-    pauseSound();
+    stopSound();
   };
 
   eighthNoteTime = (60 / tempo) / 2;

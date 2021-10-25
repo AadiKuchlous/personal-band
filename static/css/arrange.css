@@ -168,7 +168,7 @@ body {
 }
 
 #number-canvas {
-  height: 20px;
+//  height: 20px;
   position: absolute;
   visibility: none;
 }
@@ -259,4 +259,9 @@ body {
   right: 0px;
   margin-right: 160px;
   display: inline-flex;
+}
+
+#playhead-canvas {
+  position: absolute;
+  z-index: 98;
 }
