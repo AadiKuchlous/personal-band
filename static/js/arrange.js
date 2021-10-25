@@ -4,6 +4,8 @@ let selected_block = null;
 let quarter_note_block_width = 100;
 let theme = "dark";
 let theme_obj = themes[theme];
+var line_to_delete = null;
+
 
 $(document).ready(function(){
   init();
@@ -54,11 +56,15 @@ $(document).ready(function(){
   })
 
   changeTheme();
+
+  $('#download-wav').click(downloadWav);
 })
+
 
 function capitalize(word) {
   return word[0].toUpperCase() + word.slice(1).toLowerCase();
 }
+
 
 function generateDropdownItems(items, block) {
   let dropdown_items = [];
@@ -145,6 +151,7 @@ function generateDropdownItems(items, block) {
   return(dropdown_items);
 }
 
+
 function generateBlockLengthDropdown(block) {
   let length_dropdown = $('<div/>').addClass('dropdown').addClass('block-length-dropdown')
 
@@ -164,6 +171,7 @@ function generateBlockLengthDropdown(block) {
 
   return(length_dropdown)
 }
+
 
 function addLine(inst, from_load=null) {
   let arrange_area = $("#arrange-area");
@@ -253,50 +261,80 @@ function addLine(inst, from_load=null) {
   })
   track_header.append(volume_knob);
 
+  track_header.append(
+	$('<div/>')
+	.addClass('line-del')
+	.html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#ffffff"><path d="M107.33488,86l46.8872,-70.3308c0.70176,-1.05608 0.77056,-2.41144 0.172,-3.52944c-0.59856,-1.118 -1.76472,-1.81976 -3.03408,-1.81976h-25.2496c-1.12488,0 -2.18096,0.5504 -2.82424,1.47576l-37.28616,53.56424l-37.2896,-53.56424c-0.64328,-0.92536 -1.69592,-1.47576 -2.8208,-1.47576h-25.2496c-1.26936,0 -2.43552,0.69832 -3.03408,1.81632c-0.59856,1.118 -0.52976,2.4768 0.172,3.52944l46.8872,70.33424l-46.8872,70.3308c-0.70176,1.05608 -0.77056,2.41144 -0.172,3.52944c0.59856,1.118 1.76472,1.81976 3.03408,1.81976h25.2496c1.12488,0 2.18096,-0.5504 2.82424,-1.47576l37.28616,-53.56424l37.2896,53.56424c0.64328,0.92536 1.69592,1.47576 2.8208,1.47576h25.2496c1.26936,0 2.43552,-0.69832 3.03408,-1.81632c0.59856,-1.118 0.52976,-2.4768 -0.172,-3.52944z"></path></g></g></svg>')
+	.click(() => (deleteLine(line)))
+  );
+
+  track_header.hover(function (){
+	  $(this).find('.line-del').css({'display': 'flex'})
+	}, 
+	function (){
+	  $(this).find('.line-del').css({'display': 'none'})
+	}
+  );
+
   $('#track-list-grid').append(track_header)
 
   return(line);
 }
 
 
-function blockDragged(event, ui) {
-			let this_block = $(this);
-			let old_start = parseInt(this_block.css('grid-column-start'));
-			let old_end = parseInt(this_block.css('grid-column-end'));
-			let displacement = this_block.css('left');
-			let grid_displacement = parseInt(displacement)/25;
-			let grid_start = old_start + grid_displacement;
-			let grid_end = old_end + grid_displacement;
-			this_block.css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
-			let line_pos = parseInt(this_block.parent().attr('position'));
-			let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt(this_block.attr('position'))];
-			block_obj['grid-start'] = grid_start;
-			block_obj['grid-end'] = grid_end;
+function deleteLine(line) {
+  line_to_delete = line;
+  $('#deleteLineModal').modal('show');
+}
 
-			let line_div = this_block.parent();
-			let line_obj = arrange_data['lines'][parseInt(line_div.attr('position'))];
-			if (grid_end > line_obj['grid-end']) {
-			  line_obj['grid-end'] = parseInt(grid_end);
-			  line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-			}
-			if (old_end == line_obj['grid-end'] && grid_end < line_obj['grid-end']) {
-			  console.log(line_div)
-			  let line_end = 0;
-			  line_div.find('.inst-block').each(
-			    (i, block) => {
-			      let block_end = parseInt($(block).css('grid-column-end'));
-			      if (block_end > line_end) {
-				line_end = block_end;
-			      }
-			    }
-			  );
-			  line_obj['grid-end'] = line_end;
-                          line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-			}
-			findNewTotalLength();
-			line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
-			loadProject(JSON.stringify(arrange_data));
-		}
+
+function confirmDeleteLine() {
+  let index = parseInt(line_to_delete.attr('position'));
+  arrange_data['lines'].splice(index, 1);
+  loadProject(JSON.stringify(arrange_data));  
+}
+
+
+function blockDragged(event, ui) {
+  let this_block = $(this);
+  let old_start = parseInt(this_block.css('grid-column-start'));
+  let old_end = parseInt(this_block.css('grid-column-end'));
+  let displacement = this_block.css('left');
+  let grid_displacement = parseInt(displacement)/25;
+  let grid_start = old_start + grid_displacement;
+  let grid_end = old_end + grid_displacement;
+  this_block.css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
+  let line_pos = parseInt(this_block.parent().attr('position'));
+  let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt(this_block.attr('position'))];
+  block_obj['grid-start'] = grid_start;
+  block_obj['grid-end'] = grid_end;
+
+  let line_div = this_block.parent();
+  let line_obj = arrange_data['lines'][parseInt(line_div.attr('position'))];
+  if (grid_end > line_obj['grid-end']) {
+    line_obj['grid-end'] = parseInt(grid_end);
+    line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
+  }
+  if (old_end == line_obj['grid-end'] && grid_end < line_obj['grid-end']) {
+    console.log(line_div)
+    let line_end = 0;
+    line_div.find('.inst-block').each(
+      (i, block) => {
+        let block_end = parseInt($(block).css('grid-column-end'));
+        if (block_end > line_end) {
+          line_end = block_end;
+        }
+      }
+    );
+    line_obj['grid-end'] = line_end;
+    line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
+  }
+  findNewTotalLength();
+  line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
+  loadProject(JSON.stringify(arrange_data));
+}
+
+
 function addblock(inst, id, from_load) {
   let arrange_area = $("#arrange-area");
   let inst_line = $('#'+id);
@@ -413,6 +451,7 @@ function addblock(inst, id, from_load) {
   if (!from_load) {
     block = $('#' + block_id)
   
+    block_obj['sound'] = '';
     block_obj["name"] = inst + index.toString();
     block_obj["length"] = 1;
   

@@ -27,9 +27,10 @@ function loadProject(data_string) {
       let block = blocks[j];
       addblock(inst, line_id, true);
     }
-
-    //Draw the grid
-    $('#grid-canvas').attr('height', $('#arrange-area').children('.inst-line').length*120 + 'px');
-    drawGrid('grid-canvas', 25);
   }
+
+  //Draw the grid
+  $('#grid-canvas').attr('height', $('#arrange-area').children('.inst-line').length*120 + 'px');
+  drawGrid('grid-canvas', 25);
+  
 }

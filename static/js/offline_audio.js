@@ -1,3 +1,4 @@
+// var toWav = require('audiobuffer-to-wav');
 var tempo = 120; // BPM (beats per minute)
 var eighthNoteTime;
 var loopInterval;
@@ -10,6 +11,7 @@ var line_buffers = {};
 var seq_length = 0;
 var lines_loaded = 0;
 var total_lines = 0;
+var waiting_for_download;
 
 function newGlobalContext() {
   eighthNoteTime = (60 / tempo) / 2;
@@ -36,6 +38,8 @@ function play () {
   if (playing) {
     pauseSound();
   };
+
+  eighthNoteTime = (60 / tempo) / 2;
   total_lines = 0;
   playing = true;
   newGlobalContext();
@@ -91,18 +95,20 @@ function load_line(line, index, volume, seq_start_time){
     let line_start_time = 0;
     for (var i = 0; i < blocks.length; i++) {
       block = blocks[i];
-      levels = block['sound'].split('/');
-      let buffer = instrument_tree;
-      // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
-      // path in this tree. Example: 'Notes/A'
-      for (level = 0; level < levels.length; level++) {
-        key = levels[level];
-        buffer = buffer[key];
-      }
+      if (block['sound'] !== '') {
+        levels = block['sound'].split('/');
+        let buffer = instrument_tree;
+        // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
+        // path in this tree. Example: 'Notes/A'
+        for (level = 0; level < levels.length; level++) {
+          key = levels[level];
+          buffer = buffer[key];
+        }
 
-      let start_time = line_start_time + eighthNoteTime * 0.5 * (block['grid-start'] - 1);
-      end_time = start_time + eighthNoteTime * 2 * block["length"];
-      loadOffline(buffer, start_time, end_time, volume, lineCtx);
+        let start_time = line_start_time + eighthNoteTime * 0.5 * (block['grid-start'] - 1);
+        end_time = start_time + eighthNoteTime * 2 * block["length"];
+        loadOffline(buffer, start_time, end_time, volume, lineCtx);
+      }
     }
 
     lineCtx.startRendering().then(function(renderedBuffer) {
@@ -139,13 +145,18 @@ function playFull(seq_start_time){
     let fullBuffer = renderedBuffer;
     let length = seq_length * 100;
     playSound(fullBuffer, seq_start_time, seq_start_time+length, 1);
+    if (waiting_for_download) {
+      serveDownload(renderedBuffer);
+    }
+
+/*
     globalOfflineContext = new OfflineAudioContext({
       numberOfChannels: 2,
       length: 44100 * 100,
       sampleRate: 44100
     });
+*/
   });
-
 }
 
 function loadOffline(buffer, time, end_time, volume, ctx) {
@@ -213,8 +224,30 @@ $(document).ready(function(){
   }).on('blur', function(){
       $(this).hide()
       tempo = $(this).val()
+      eighthNoteTime = (60 / tempo) / 2;
       $('#tempo-span').show().text(tempo)
       arrange_data['tempo'] = tempo;
     })
 
 })
+
+
+function downloadWav() {
+  waiting_for_download = true;
+  play();
+}
+
+function serveDownload(buffer) {
+  let anchor = $('#download-a');
+  let wav = audioBufferToWav(buffer);
+  let blob = new window.Blob([ new DataView(wav) ], {
+    type: 'audio/wav'
+  });
+
+  let url = window.URL.createObjectURL(blob);
+  anchor.attr('href', url);
+  anchor.attr('download', 'audio.wav');
+//  window.location.href = url;
+  anchor[0].click();
+//  window.URL.revokeObjectURL(url);
+}
