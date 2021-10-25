@@ -1,4 +1,3 @@
-// var toWav = require('audiobuffer-to-wav');
 var tempo = 120; // BPM (beats per minute)
 var eighthNoteTime;
 var loopInterval;
@@ -12,6 +11,8 @@ var seq_length = 0;
 var lines_loaded = 0;
 var total_lines = 0;
 var waiting_for_download;
+var play_start_time = 0;
+var fullBuffer = null;
 
 function newGlobalContext() {
   eighthNoteTime = (60 / tempo) / 2;
@@ -39,12 +40,14 @@ function play () {
     stopSound();
   };
 
+  playhead_position = 0;
   eighthNoteTime = (60 / tempo) / 2;
   total_lines = 0;
   playing = true;
   newGlobalContext();
   let cur_time = globalcontext.currentTime;
   seq_length = loadSequence(cur_time);
+
 /*
   loopInterval = setInterval(
     () => {
@@ -142,8 +145,10 @@ function addToGlobal(buffer, line, start_time, index, seq_start_time) {
 function playFull(seq_start_time){
   console.log("playing full")
   globalOfflineContext.startRendering().then(function(renderedBuffer) {
-    let fullBuffer = renderedBuffer;
+    fullBuffer = renderedBuffer;
     let length = seq_length * 100;
+    play_start_time = seq_start_time;
+    updatePlayheadPos(fullBuffer);
     playSound(fullBuffer, seq_start_time, seq_start_time+length, 1);
     if (waiting_for_download) {
       serveDownload(renderedBuffer);
@@ -186,7 +191,7 @@ function playSound(buffer, time, end_time, volume) {
   let fade_out_curve = [volume, volume*0.3, 0]
   gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
 
-  source.start(time);
+  source.start(time, playhead_position * eighthNoteTime);
   source.stop(end_time+0.1);
 }
 

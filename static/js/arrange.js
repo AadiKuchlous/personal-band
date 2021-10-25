@@ -5,7 +5,7 @@ let quarter_note_block_width = 100;
 let theme = "dark";
 let theme_obj = themes[theme];
 var line_to_delete = null;
-
+var playhead_position = 0;
 
 $(document).ready(function(){
   init();
@@ -62,19 +62,27 @@ $(document).ready(function(){
 
   changeTheme();
 
-/*
   drawPlayhead();
   $('#playhead-canvas').draggable({
 	'axis':'x',
-	'grid': [25],
-	'containment': '.inst-line',
-//	stop: blockDragged,
+	'grid': [quarter_note_block_width/4],
+        drag: function(event, ui) {
+	  if (ui.position.left < parseFloat(playhead_start_pos)) {
+	    ui.position.left = parseFloat(playhead_start_pos);
+	  }
+	},
+	stop: playheadDragged,
 	'cursor': 'move'
   })
-*/
 
   $('#download-wav').click(downloadWav);
 })
+
+
+function playheadDragged(event, ui) {
+  playhead_position = (parseFloat($(this).css('left')) - playhead_start_pos) / (quarter_note_block_width/2);
+  console.log(playhead_position);
+}
 
 
 function capitalize(word) {
@@ -297,11 +305,13 @@ function addLine(inst, from_load=null) {
 
   if (!grid_drawn){
     $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
-    drawGrid('grid-canvas', 25);
+    drawGrid('grid-canvas', quarter_note_block_width/4);
   }
   else {
     $('#grid-canvas').css({'width': $('#grid-canvas').attr('width'), 'height': ((line_no+1)*120) + 'px'})
   }
+
+//  drawPlayhead();
 
   return(line);
 }
@@ -325,7 +335,7 @@ function blockDragged(event, ui) {
   let old_start = parseInt(this_block.css('grid-column-start'));
   let old_end = parseInt(this_block.css('grid-column-end'));
   let displacement = this_block.css('left');
-  let grid_displacement = parseInt(displacement)/25;
+  let grid_displacement = parseInt(displacement)/(quarter_note_block_width/4);
   let grid_start = old_start + grid_displacement;
   let grid_end = old_end + grid_displacement;
   this_block.css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
@@ -377,7 +387,7 @@ function addblock(inst, id, from_load) {
 	.attr('inst', inst)
 	.draggable({
 		'axis':'x',
-		'grid': [25],
+		'grid': [quarter_note_block_width/4],
 		'containment': '.inst-line',
 		stop: blockDragged,
 		'cursor': 'move'
@@ -679,5 +689,5 @@ function changeTheme() {
   $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
 
   $('#download-svg-path').css({'fill': theme_obj["del-line-color"]});
-  drawNumbers('number-canvas', 25);
+  drawNumbers('number-canvas', quarter_note_block_width/4);
 }

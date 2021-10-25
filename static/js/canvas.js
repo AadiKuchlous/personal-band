@@ -105,6 +105,27 @@ function drawPlayhead() {
   ctx.moveTo(width/2, 0);
   ctx.lineTo(width/2, height);
   ctx.stroke();
-  ctx.closePath()
+  ctx.closePath();
+}
 
+
+function updatePlayheadPos() {
+  let cur_time = globalcontext.currentTime;
+  let current_play_position = cur_time-play_start_time;
+  if (current_play_position <= fullBuffer.duration - playhead_position * eighthNoteTime && playing) {
+    let playhead = $('#playhead-canvas');
+    let new_pos = (playhead_position * quarter_note_block_width/2) + playhead_start_pos + (cur_time / eighthNoteTime) * quarter_note_block_width;
+    playhead.css({'left': new_pos}); 
+    window.requestAnimationFrame(updatePlayheadPos);
+  }
+  else {
+    roundPlayhead()
+  }
+  console.log(playhead_position)
+}
+
+
+function roundPlayhead() {
+  playhead_position = Math.round((parseFloat($('#playhead-canvas').css('left'))-192)/quarter_note_block_width/4)/2;
+  $('#playhead-canvas').css({'left': (playhead_position*quarter_note_block_width/2)+playhead_start_pos});
 }
