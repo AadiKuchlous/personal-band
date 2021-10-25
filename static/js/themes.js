@@ -13,7 +13,8 @@ var themes = {
     'block-pink-highlight': 'none',
     'note-select-button-color': '#f5f5f5',
     'new-track-hover-color': 'white',
-    'modal-background': 'white'
+    'modal-background': 'white',
+    'del-line-color': '#a0a0a0'
   },
   "dark": {
     'control-bar-background': '#21003a',
@@ -29,6 +30,7 @@ var themes = {
     'block-pink-highlight': '#db9ced',
     'note-select-button-color': '#323232',
     'new-track-hover-color': '#262626',
-    'modal-background': '#5a5a5a'
+    'modal-background': '#5a5a5a',
+    'del-line-color': '#ffffff'
   }
 }
