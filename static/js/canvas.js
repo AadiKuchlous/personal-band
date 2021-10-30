@@ -76,8 +76,9 @@ function drawPlayhead() {
   let canvas = $('#playhead-canvas');
 
   let left = parseFloat($('#arrange-area').css('padding-left'))-(canvas.attr('width')/2);
+  left = parseFloat($('#number-area').css('padding-left'))-8;
   canvas.css({
-          'top': $('#number-canvas').height()*-1,
+//          'top': $('#number-canvas').height()*-1,
           'left': left
         });
 
@@ -119,14 +120,22 @@ function updatePlayheadPos() {
     window.requestAnimationFrame(updatePlayheadPos);
   }
   else {
-    playhead_position = (parseFloat($('#playhead-canvas').css('left'))-192)/(quarter_note_block_width/2);
+    playhead_position = (parseFloat($('#playhead-canvas').css('left'))-playhead_start_pos)/(quarter_note_block_width/2);
   }
-  console.log(playhead_position)
 }
 
 
 function roundPlayhead() {
-  console.log('before_change: ' + playhead_position)
-  playhead_position = Math.round((parseFloat($('#playhead-canvas').css('left'))-192)/(quarter_note_block_width/4))/2;
+  playhead_position = Math.round((parseFloat($('#playhead-canvas').css('left'))-playhead_start_pos)/(quarter_note_block_width/4))/2;
+  $('#playhead-canvas').css({'left': (playhead_position*quarter_note_block_width/2)+playhead_start_pos});
+}
+
+
+function movePlayhead() {
+  $('#playhead-canvas').css({'left': (playhead_position*quarter_note_block_width/2)+playhead_start_pos});
+}
+
+function newPlayheadPosition() {
+  playhead_position = (parseFloat($('#playhead-canvas').css('left'))-playhead_start_pos)/(quarter_note_block_width/2);
   $('#playhead-canvas').css({'left': (playhead_position*quarter_note_block_width/2)+playhead_start_pos});
 }

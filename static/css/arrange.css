@@ -98,7 +98,7 @@ body {
 
 #studio-body {
   height: 100vh;
-  position: absolute;
+  position: relative;
   background-color: #000000;
   width: 100000px;
 }
@@ -169,7 +169,7 @@ body {
 
 #number-canvas {
 //  height: 20px;
-  position: absolute;
+//  position: sticky;
   visibility: none;
 }
 
@@ -264,4 +264,13 @@ body {
 #playhead-canvas {
   position: absolute;
   z-index: 98;
+  cursor: grab;
+}
+
+#number-area {
+  padding-left: 200px;
+  position: sticky;
+  top: 50px;
+  cursor: col-resize;
+  z-index: 100;
 }

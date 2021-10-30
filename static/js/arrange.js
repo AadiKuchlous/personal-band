@@ -10,20 +10,60 @@ var playhead_position = 0;
 $(document).ready(function(){
   init();
   $(this).keydown(function(e) {
-    if(e.which == 8) {
+    if (e.which == 8) {
       e.preventDefault();
       let line_pos = parseInt(selected_block.parent('.inst-line').attr('position'));
       let block_pos = parseInt(selected_block.attr('position'));
       arrange_data['lines'][line_pos]['blocks'].splice(block_pos, 1);
       selected_block.remove();
     }
+
+    // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
+    if (e.which == 39) {
+      if (!playing) {
+      e.preventDefault();
+        if (event.shiftKey) {
+          playhead_position += 8;
+        }
+        else {
+          playhead_position += 0.5;
+        }
+      }
+    }
+    if (e.which == 37) {
+      if (!playing) {
+        e.preventDefault();
+      
+        if (playhead_position >= 0.5) {
+          if (event.shiftKey) {
+            if (playhead_position >= 8) {
+              playhead_position -= 8;
+            }
+            else {
+              playhead_position = 0;
+            }
+          }
+          else {
+            playhead_position -= 0.5;
+          }
+        }
+        else {
+          playhead_position = 0;
+        }
+      }
+    }
+    
+  movePlayhead();
   });
 
-  $('#number-canvas').attr('width', '50000px').attr('height', '32px').css({'top': $('#number-canvas').height()*-1});
+  $('#number-area').css({'height': '32px'});
+  $('#number-canvas').attr('width', '50000px').attr('height', $('#number-area').height());
+//	.css({'top': $('#control-bar').height()})
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
-  $('#studio-body').css({'top': $('#control-bar').height()+$('#number-canvas').height()});
+  $('#studio-body').css({'top': $('#control-bar').height()});
   $('#playhead-canvas').attr('width', $('#number-canvas').height()/2)
 	.attr('height', '0px');
+  $('#arrange-area').css({'top': $('#number-area').height()});
 
   $('#load-project').click((() => {loadProject(sample_project)}));
 
@@ -66,6 +106,9 @@ $(document).ready(function(){
   $('#playhead-canvas').draggable({
 	'axis':'x',
 	'grid': [quarter_note_block_width/4],
+        start: function(event, ui) {
+          $('.inst-line, .inst-block').off('mouseenter mouseleave')
+        },
         drag: function(event, ui) {
 	  if (ui.position.left < parseFloat(playhead_start_pos)) {
 	    ui.position.left = parseFloat(playhead_start_pos);
@@ -80,13 +123,28 @@ $(document).ready(function(){
     roundPlayhead();
   })
 
+  $('#number-canvas').click(numberCnavasClick);
+
   $('#download-wav').click(downloadWav);
 })
 
 
 function playheadDragged(event, ui) {
   playhead_position = (parseFloat($(this).css('left')) - playhead_start_pos) / (quarter_note_block_width/2);
-  console.log(playhead_position);
+  $('.inst-line').hover(instLineHover, instLineHoverOut);
+  $('.inst-block').hover(blockHover,blockHoverOut);
+}
+
+
+function numberCnavasClick(e) {
+  if (!playing) {
+    let posX = e.pageX-$(this).offset().left + playhead_start_pos;
+    if (posX < 0) {
+      posX = playhead_start_pos;
+    }
+    $('#playhead-canvas').css({'left': posX});
+    newPlayheadPosition();
+  }
 }
 
 
@@ -227,13 +285,7 @@ function addLine(inst, from_load=null) {
     }
   })(inst,id))
   line.append(add_button);
-  line.hover( function (){
-	  $(this).find('.add-block').css({'display': 'flex'})
-	}, 
-	function (){
-	  $(this).find('.add-block').css({'display': 'none'})
-	}
-  );
+  line.hover(instLineHover, instLineHoverOut);
 
   arrange_area.append(line);
 
@@ -306,8 +358,6 @@ function addLine(inst, from_load=null) {
 
   $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
 
-  console.log('added header and line')
-
   if (!grid_drawn){
     $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
     drawGrid('grid-canvas', quarter_note_block_width/4);
@@ -319,6 +369,14 @@ function addLine(inst, from_load=null) {
 //  drawPlayhead();
 
   return(line);
+}
+
+function instLineHover (){
+  $(this).find('.add-block').css({'display': 'flex'})
+}
+
+function instLineHoverOut (){
+  $(this).find('.add-block').css({'display': 'none'})
 }
 
 
@@ -356,7 +414,6 @@ function blockDragged(event, ui) {
     line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
   }
   if (old_end == line_obj['grid-end'] && grid_end < line_obj['grid-end']) {
-    console.log(line_div)
     let line_end = 0;
     line_div.find('.inst-block').each(
       (i, block) => {
@@ -447,9 +504,15 @@ function addblock(inst, id, from_load) {
   }
 
   block.click(function() {
-    $( this ).addClass('block-selected');
+    if ($(this).hasClass('block-selected')) {
+      $(this).removeClass('block-selected');
+      selected_block = null;
+    }
+    else {
+      $( this ).addClass('block-selected');
+      selected_block = $(this);
+    }
     $('.inst-block').not(this).removeClass('block-selected');
-    selected_block = $(this);
     $(this).find('.block-del').css({'display': 'flex'});
   });
 
@@ -468,13 +531,7 @@ function addblock(inst, id, from_load) {
 	.click(() => (deleteBlock(block)))
   );
 
-  block.hover( function (){
-		  $(this).find('.block-del').css({'display': 'flex'})
-		}, 
-		function (){
-		  $(this).find('.block-del').css({'display': 'none'})
-		}
-	);
+  block.hover(blockHover,blockHoverOut);
 
   block.css({backgroundColor: theme_obj['block-'+line_obj['color']]});
   block.css({'box-shadow': '0 0 20px ' + theme_obj['block-'+line_obj['color']+'-highlight'] });
@@ -502,6 +559,14 @@ function addblock(inst, id, from_load) {
   
     line_obj["blocks"].push(block_obj);
   }
+}
+
+function blockHover() {
+  $(this).find('.block-del').css({'display': 'flex'})
+}
+
+function blockHoverOut() {
+  $(this).find('.block-del').css({'display': 'none'})
 }
 
 

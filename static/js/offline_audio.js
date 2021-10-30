@@ -13,6 +13,7 @@ var total_lines = 0;
 var waiting_for_download;
 var play_start_time = 0;
 var fullBuffer = null;
+var stop_timeout;
 
 function newGlobalContext() {
   eighthNoteTime = (60 / tempo) / 2;
@@ -26,9 +27,8 @@ function newGlobalContext() {
 }
 
 function stopSound() {
-  playing = false;
+  pause();
   playhead_position = 0;
-  newGlobalContext();
   if (loopInterval) {
     clearInterval(loopInterval);
     loopInterval = null;
@@ -39,7 +39,8 @@ function stopSound() {
 function pause() {
   playing = false;
   newGlobalContext();
-  playhead_position = 0;
+  clearTimeout(stop_timeout);
+//  playhead_position = 0;
 }
 
 
@@ -49,7 +50,10 @@ function play () {
   playing = true;
   newGlobalContext();
   let cur_time = globalcontext.currentTime;
-  seq_length = loadSequence(cur_time);
+  loadSequence(cur_time);
+  let length = (seq_length - (playhead_position * eighthNoteTime))*1000;
+  console.log(length+100)
+  stop_timeout = setTimeout(() => {playing = false; clearTimeout(stop_timeout)}, length+100);
 
 /*
   loopInterval = setInterval(
@@ -69,7 +73,7 @@ function play () {
 
 
 function loadSequence(start_time) {
-  let seq_length = 0;
+  seq_length = 0;
   for (i = 0; i < arrange_data['lines'].length; i++){
     let line = arrange_data['lines'][i];
     if (line['length'] > 0) {
@@ -122,7 +126,7 @@ function load_line(line, index, volume, seq_start_time){
       addToGlobal(buffer, line, line_start_time, index, seq_start_time);
     });
 
-    return (end_time - line_start_time);
+    return (end_time - seq_start_time);
   }
 }
 
@@ -146,7 +150,6 @@ function addToGlobal(buffer, line, start_time, index, seq_start_time) {
 
 
 function playFull(seq_start_time){
-  console.log("playing full")
   globalOfflineContext.startRendering().then(function(renderedBuffer) {
     fullBuffer = renderedBuffer;
     let length = seq_length * 100;
