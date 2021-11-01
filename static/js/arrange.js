@@ -2,10 +2,27 @@ let arrange_data = {'lines':[], 'length':0, 'tempo':120};
 let block_length_options = ['1/16', '1/8', '1/4', '1/2', '1']
 let selected_block = null;
 let quarter_note_block_width = 100;
-let theme = "dark";
+let theme = "light";
 let theme_obj = themes[theme];
 var line_to_delete = null;
 var playhead_position = 0;
+var keys = {
+	"types": {
+		'major': {
+			"notes": [0, 2, 2, 1, 2, 2, 2],
+			"chords": ['major', 'minor', 'minor', 'major', 'major', 'minor', 'minor']
+		},
+		'minor': {
+			"notes": [0, 2, 1, 2, 2, 1, 2],
+			"chords": ['minor', 'minor', 'major', 'minor', 'minor', 'major', 'major']
+		}
+	},
+	"notes": ['C', 'C#','D', 'D#','E', 'F','F#', 'G','G#', 'A','A#', 'B']
+}
+var scale = ['C', 'major'];
+var scale_notes = [];
+var scale_chords = [];
+
 
 $(document).ready(function(){
   init();
@@ -60,10 +77,11 @@ $(document).ready(function(){
   $('#number-canvas').attr('width', '50000px').attr('height', $('#number-area').height());
 //	.css({'top': $('#control-bar').height()})
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
-  $('#studio-body').css({'top': $('#control-bar').height()});
+//  $('#studio-body').css({'top': $('#control-bar').height()});
   $('#playhead-canvas').attr('width', $('#number-canvas').height()/2)
 	.attr('height', '0px');
-  $('#arrange-area').css({'top': $('#number-area').height()});
+
+  $('#arrange-area').css({'top': $('#number-area').height()+$('#control-bar').height()});
 
   $('#load-project').click((() => {loadProject(sample_project)}));
 
@@ -123,9 +141,12 @@ $(document).ready(function(){
     roundPlayhead();
   })
 
-  $('#number-canvas').click(numberCnavasClick);
+  $('#number-canvas').click(numberCanvasClick);
 
   $('#download-wav').click(downloadWav);
+
+  generateKeyDropdowns();
+  getScale();
 })
 
 
@@ -136,7 +157,7 @@ function playheadDragged(event, ui) {
 }
 
 
-function numberCnavasClick(e) {
+function numberCanvasClick(e) {
   if (!playing) {
     let posX = e.pageX-$(this).offset().left + playhead_start_pos;
     if (posX < 0) {
@@ -359,7 +380,7 @@ function addLine(inst, from_load=null) {
   $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
 
   if (!grid_drawn){
-    $('#grid-canvas').attr('height', ((line_no+1)*120) + 'px');
+    $('#grid-canvas').attr('height', '120px');
     drawGrid('grid-canvas', quarter_note_block_width/4);
   }
   else {
@@ -389,6 +410,11 @@ function deleteLine(line) {
 function confirmDeleteLine() {
   let index = parseInt(line_to_delete.attr('position'));
   arrange_data['lines'].splice(index, 1);
+/*
+  if (arrange_data['lines'].length == 0) {
+    grid_drawn = false;
+  }
+*/
   loadProject(JSON.stringify(arrange_data));  
 }
 
@@ -531,17 +557,25 @@ function addblock(inst, id, from_load) {
 	.click(() => (deleteBlock(block)))
   );
 
-  block.hover(blockHover,blockHoverOut);
+  block.hover(blockHover, blockHoverOut);
 
   block.css({backgroundColor: theme_obj['block-'+line_obj['color']]});
   block.css({'box-shadow': '0 0 20px ' + theme_obj['block-'+line_obj['color']+'-highlight'] });
+
+  let chord_symbol = $('<img/>').attr('src', 'https://img.icons8.com/fluency-systems-filled/20/000000/layers.png').addClass('block-chord-symbol');
 
   if (from_load) {
     let sound = line_obj['blocks'][index]['sound'];
     block.attr('sound', sound);
     block.append($('<div/>').addClass('block-label').text(sound.split('/').at(-1)))
     block.attr('title', sound)
+   
+    if (sound.split('/')[0] == 'chords') { 
+      chord_symbol.css({'display': 'block'});
+    }
   }
+
+  block.append(chord_symbol);
 
   inst_line.append(block);
 
@@ -620,12 +654,40 @@ function loadNoteModal(block) {
 				 .attr('value', section+'/'+sound)
 				 .html(sound)
 				 .addClass('note-button')
-				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color']})
+				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color'], 'user-select': 'none'})
+
+      if (block.attr('sound').split('/')[1] == sound && block.attr('sound').split('/')[0] == section) {
+        button.css({'border-color': 'blue'});
+      }
+
       if (Number.isInteger((index+1)/2)) {
         button.addClass('align-self-end')
       }
       else {
         button.addClass('align-self-start')
+      }
+
+      // Highlight button if it is part of the scale
+      if (section == 'chords') {
+        // Get the chord name as per convention: <root_note>-<type>
+        let chord_type = 'major';
+        let chord = sound;
+        let suffix = chord.slice(-1);
+        if (suffix == 'm') {
+          chord = chord.slice(0, -1);
+          chord_type = 'minor';
+        }
+        let chord_name = chord + '-' + chord_type;
+
+        // Check if chord is in the scale_chords and add highlight class
+        if (scale_chords.includes(chord_name)) {
+          button.addClass('highlight');
+        }
+      }
+      if (section == 'notes') {
+        if (scale_notes.includes(sound)) {
+          button.addClass('highlight');
+        }
       }
 
       button.append($('<div>').addClass('note-listen').html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#000000"><path d="M107.45801,23.59961c-3.81482,-0.02636 -7.12468,3.16106 -7.12468,7.18066c0,3.16767 2.08371,6.02157 5.15104,6.80273c20.43844,5.20703 35.82348,22.73457 37.66699,44.09179c0.1229,1.42382 0.18197,2.86992 0.18197,4.3252c0,23.2845 -16.04796,42.86282 -37.84896,48.41699c-3.06733,0.78117 -5.15104,3.63507 -5.15104,6.80274c0,4.59383 4.3327,8.10303 8.79036,6.9707c27.90701,-7.08783 48.54297,-32.28393 48.54297,-62.19043c0,-29.9065 -20.63597,-55.1026 -48.54297,-62.19043c-0.5572,-0.14154 -1.12071,-0.2062 -1.66568,-0.20996zM79.61719,31.66211c-2.01815,-0.23721 -4.15778,0.37849 -5.85091,2.07161l-30.76628,30.76628h-14.33333c-7.91917,0 -14.33333,6.41417 -14.33333,14.33333v14.33333c0,7.91917 6.41417,14.33333 14.33333,14.33333h14.33333l30.76628,30.76628c4.515,4.515 12.23372,1.31844 12.23372,-5.06706v-94.39844c0,-3.99094 -3.01924,-6.74332 -6.38281,-7.13867zM107.22006,54.01595c-3.61201,0.13706 -6.88672,3.16341 -6.88672,7.19466v0.16797c0,2.52267 1.32684,4.87053 3.54134,6.08887c6.59333,3.6335 10.79199,10.56322 10.79199,18.53255c0,7.96933 -4.19866,14.89222 -10.79199,18.51855c-2.2145,1.21833 -3.54134,3.5802 -3.54134,6.10287v0.15397c0,5.38217 5.83938,8.986 10.51205,6.31283c10.89333,-6.22783 18.15462,-17.80839 18.15462,-31.08822c0,-13.27983 -7.26129,-24.85322 -18.15462,-31.08822c-1.16817,-0.6665 -2.42133,-0.94152 -3.62532,-0.89583z"></path></g></g></svg>'));
@@ -651,10 +713,20 @@ function loadNoteModal(block) {
           return(
             function(e) {
               if (e.target == this) {
+                modal_body.find(".note-button").css({'border-color': '#767676'});
+                $(this).css({'border-color': 'blue'});
+
                 block.attr("sound", $(this).attr("value"));
                 block.find('.block-label').remove();
                 block.append($('<div/>').text($(this).attr("value").split('/').at(-1)).addClass('block-label'));
                 arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
+
+                if ($(this).attr("value").split('/')[0] == 'chords') {
+                  block.find('.block-chord-symbol').css({'display': 'block'});
+                }
+                else {
+                  block.find('.block-chord-symbol').css({'display': 'none'});
+                }
               }
             }
           )
@@ -756,8 +828,101 @@ function changeTheme() {
   $('.tempo').css({'color': theme_obj['text-color']});
   $('.tempo-change-path').css({'fill': theme_obj["del-line-color"]});
   
+  $('.key-change').css({'color': theme_obj['text-color']});
+
   $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
 
+  $('#number-area').css({'background-color': theme_obj['studio-background']});
   $('#download-svg-path').css({'fill': theme_obj["del-line-color"]});
   drawNumbers('number-canvas', quarter_note_block_width/4);
+}
+
+
+function generateKeyDropdowns() {
+  keys['notes'].forEach((note) => {
+    let button = $('<button/>');
+    button.addClass('dropdown-item').attr('id', note)
+    .bind("click", function() {
+	  changeKeyNote($(this))
+	}
+    )
+    .html(note).attr('value', note);
+
+    if (note == "C") {
+      button.addClass('active')
+    }
+
+    $('#key-note-options').append(button);
+  })
+
+
+  console.log(keys['types'])
+
+  for(let type in keys['types']) {
+    let button = $('<button/>');
+    button.addClass('dropdown-item').attr('id', type)
+    .bind("click", function() {
+	  changeKeyType($(this))
+	}
+    )
+    .html(capitalize(type)).attr('value', type);
+
+    if (type == "major") { 
+      button.addClass('active')
+    }
+    $('#key-type-options').append(button);
+  }
+}
+
+
+function changeKeyNote(button) {
+  console.log(typeof(button))
+  console.log(button)
+  $('#key-note-options').find('button').removeClass('active')
+  button.addClass('active')
+  $('#keyNoteChangeButton').html(button.attr('value'))
+  scale.splice(0, 1, button.attr('value'));
+  getScale();
+}
+
+
+function changeKeyType(button) {
+  console.log(typeof(button))
+  console.log(button)
+  $('#key-type-options').find('button').removeClass('active')
+  button.addClass('active')
+  $('#keyTypeChangeButton').html(button.attr('value'))
+  scale.splice(1, 1, button.attr('value'));
+  getScale();
+}
+
+
+function getScale() {
+  scale_notes = [];
+  scale_chords = [];
+  let root_note = scale[0];
+  let type = scale[1];
+  let scale_form = keys['types'][type]['notes'];
+  let chord_form = keys['types'][type]['chords'];
+  let note_index = keys['notes'].indexOf(root_note);
+  let pos = 0;
+  let all_notes = keys['notes'];
+  scale_form.forEach((interval => {
+    note_index += interval;
+    note_index = note_index % all_notes.length;
+    let note = all_notes[note_index];
+    scale_notes.push(note);
+
+    let chord = note + '-' + chord_form[pos];
+    scale_chords.push(chord);
+    pos += 1;
+  }))
+
+  console.log(scale);
+  console.log(scale_chords);
+}
+
+
+function transposeToScale() {
+  return
 }

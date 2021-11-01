@@ -45,6 +45,7 @@ body {
   display: inline-flex;
   position: relative;
   border-radius: 10px;
+  cursor: grab;
 }
 
 .block-selected{
@@ -81,12 +82,12 @@ body {
 }
 
 #control-bar {
-  position: fixed;
+  position: sticky;
   top: 0;
   left: 0;
-  z-index: 100;
+  z-index: 101;
   background-color: #000000;
-  width: 100%;
+  width: 100vw;
   display: flex;
   height: 50px;
   align-items: center;
@@ -231,6 +232,7 @@ body {
   height: 80px;
   margin: 5px;
   border: 2px solid rgb(118, 118, 118);
+  cursor: pointer;
 }
 
 #SettingsButton {
@@ -273,4 +275,14 @@ body {
   top: 50px;
   cursor: col-resize;
   z-index: 100;
+}
+
+.highlight {
+  background: lightblue !important;
+}
+
+img.block-chord-symbol {
+  position: absolute;
+  top: 3px;
+  display: none;
 }
