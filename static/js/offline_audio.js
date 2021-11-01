@@ -201,6 +201,21 @@ function playSound(buffer, time, end_time, volume) {
   source.stop(end_time+0.1);
 }
 
+function playAuditionSound(buffer, time, end_time, volume) {
+  let source = globalcontext.createBufferSource();
+  let gainNode = globalcontext.createGain();
+  gainNode.gain.value = 1;
+  source.buffer = buffer;
+  source.connect(gainNode);
+  gainNode.connect(globalcontext.destination);
+  gainNode.gain.value = volume;
+  let fade_out_curve = [volume, volume*0.3, 0]
+  gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
+
+  source.start(time);
+  source.stop(end_time+0.1);
+}
+
 
 $(document).ready(function(){
   $(this).keydown(function(e) {

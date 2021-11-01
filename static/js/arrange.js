@@ -809,8 +809,8 @@ function loadNoteModal(block) {
                 key = levels[level];
                 buffer = buffer[key];
               }
-	      newGlobalContext();
-              playSound(buffer, globalcontext.currentTime, globalcontext.currentTime + 1000, 1);
+              newGlobalContext();
+              playAuditionSound(buffer, globalcontext.currentTime, globalcontext.currentTime + 1000, 1);
             }
           )
         })()
