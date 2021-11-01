@@ -11,8 +11,6 @@ function loadProject(data_string) {
   $('.track-header').remove();
   $('#arrange-area').children().remove('.inst-line');
 
-//  $('#grid-canvas').attr('height', $('#arrange-area').children('.inst-line').length*120 + 'px');
-
   if (arrange_data['lines'].length > 0) {
 
     if (!grid_drawn) {
@@ -38,6 +36,6 @@ function loadProject(data_string) {
         addblock(inst, line_id, true);
       }
     }
-  $('#grid-canvas').css({'height': $('#arrange-area').children('.inst-line').length*120 + 'px'});
   }
+  $('#grid-canvas').css({'height': $('#arrange-area').children('.inst-line').length*120 + 'px'});
 }

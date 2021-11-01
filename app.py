@@ -12,9 +12,4 @@ app.config['TESTING'] = True
 @app.route("/")
 def hello():
   paths = Path(dir) / 'static' / 'audio_files'
-  insts = []
-  for inst_path in paths.iterdir():
-    if inst_path.is_dir():
-      insts.append(str(inst_path).split('/')[-1])
-
-  return render_template("main.html", insts = insts)
+  return render_template("main.html")

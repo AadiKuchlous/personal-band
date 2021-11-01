@@ -42,10 +42,13 @@ body {
   border: none;
   height: 100px;
   width: auto;
-  display: inline-flex;
+  display: flex;
   position: relative;
   border-radius: 10px;
   cursor: grab;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .block-selected{
@@ -174,7 +177,7 @@ body {
   visibility: none;
 }
 
-#tempo-input::-webkit-inner-spin-button {
+input[type=number]::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
 
@@ -284,5 +287,14 @@ body {
 img.block-chord-symbol {
   position: absolute;
   top: 3px;
+  left: 3px;
+  display: none;
+}
+
+.block-octave-span {
+  display: none;
+}
+
+.block-octave-change {
   display: none;
 }

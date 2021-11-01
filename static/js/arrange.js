@@ -25,7 +25,7 @@ var scale_chords = [];
 
 
 $(document).ready(function(){
-  init();
+  loadAllBuffers();
   $(this).keydown(function(e) {
     if (e.which == 8) {
       e.preventDefault();
@@ -147,6 +147,8 @@ $(document).ready(function(){
 
   generateKeyDropdowns();
   getScale();
+
+  generateAddLineDropdown();
 })
 
 
@@ -416,6 +418,7 @@ function confirmDeleteLine() {
   }
 */
   loadProject(JSON.stringify(arrange_data));  
+  findNewTotalLength();
 }
 
 
@@ -560,15 +563,50 @@ function addblock(inst, id, from_load) {
   block.hover(blockHover, blockHoverOut);
 
   block.css({backgroundColor: theme_obj['block-'+line_obj['color']]});
-  block.css({'box-shadow': '0 0 20px ' + theme_obj['block-'+line_obj['color']+'-highlight'] });
+  block.css({'box-shadow': '0 0 20px ' + theme_obj['block-'+line_obj['color']+'-highlight']});
+
+  let octave_span = null;
+  let octave_input = null;
+  if (inst_data[inst].type == 'melodic') {
+    octave_span = $('<span/>').addClass('block-octave-span').css({'order': '10'}).text('2')
+	  .click(function() {
+	    $(this).siblings('.block-octave-change').show().focus().select().attr('value', $(this).text()).width($(this).width())
+	    $(this).hide()
+	  });
+    octave_input = $('<input/>').attr('type', 'number').addClass('block-octave-change').css({'order': '10'})
+    .attr('min', inst_data[inst].range.split('-')[0]).attr('max', inst_data[inst].range.split('-')[1]).attr('step', '1')
+    .keyup(function(e){
+      if (e.which == 13) {
+        e.preventDefault();
+        $(this).blur();
+      }
+    }).on('blur', function(){
+        $(this).hide();
+        $(this).siblings('.block-octave-span').show().text($(this).val());
+
+        let line = $(this).parents('.inst-line');
+
+        block.attr('sound', block.attr('sound').split('-')[0] + '-' + $(this).val());
+        arrange_data['lines'][parseInt(line.attr('position'))]['blocks'][parseInt(block.attr('position'))]['sound'] = block.attr('sound');
+      });
+
+    block.append(octave_span);
+    block.append(octave_input);
+  }
 
   let chord_symbol = $('<img/>').attr('src', 'https://img.icons8.com/fluency-systems-filled/20/000000/layers.png').addClass('block-chord-symbol');
 
   if (from_load) {
     let sound = line_obj['blocks'][index]['sound'];
     block.attr('sound', sound);
-    block.append($('<div/>').addClass('block-label').text(sound.split('/').at(-1)))
+    block.append($('<div/>').addClass('block-label').text(sound.split('/').at(-1).split('-')[0]))
     block.attr('title', sound)
+
+    if (sound !== '') {
+      if (inst_data[inst].type == 'melodic') {
+        octave_span.css({'display': 'block'});
+      }
+    }
    
     if (sound.split('/')[0] == 'chords') { 
       chord_symbol.css({'display': 'block'});
@@ -581,11 +619,18 @@ function addblock(inst, id, from_load) {
 
   if (!from_load) {
     block = $('#' + block_id)
-  
+
     block_obj['sound'] = '';
     block_obj["name"] = inst + index.toString();
     block_obj["length"] = 1;
-  
+
+    if (inst_data[inst]['type'] == 'melodic') {
+      block_obj['octave'] = 2;
+    }
+    else {
+      block_obj['octave'] = 0;
+    }
+
     let notes_modal = $("#noteModal .modal-body")
     loadNoteModal(block);
 
@@ -650,15 +695,24 @@ function loadNoteModal(block) {
     let buttons_area = $('<div/>').addClass('row').addClass('justify-content-around')
 
     Object.entries(sounds[section]).forEach(function ([sound, file], index) {
+
+     if (inst_data[block.attr('inst')].type == 'melodic') {
+       if (sound.slice(-1) !== '2') {
+         return
+       }
+     }
+
       let button = $('<div/>').addClass('col-5')
 				 .attr('value', section+'/'+sound)
-				 .html(sound)
+				 .html(sound.split('-')[0])
 				 .addClass('note-button')
 				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color'], 'user-select': 'none'})
 
-      if (block.attr('sound').split('/')[1] == sound && block.attr('sound').split('/')[0] == section) {
-        button.css({'border-color': 'blue'});
-      }
+      try {
+        if (block.attr('sound').split('/')[1] == sound && block.attr('sound').split('/')[0] == section) {
+          button.css({'border-color': 'blue'});
+        }
+      } catch (error) {}
 
       if (Number.isInteger((index+1)/2)) {
         button.addClass('align-self-end')
@@ -671,7 +725,7 @@ function loadNoteModal(block) {
       if (section == 'chords') {
         // Get the chord name as per convention: <root_note>-<type>
         let chord_type = 'major';
-        let chord = sound;
+        let chord = sound.split('-')[0];
         let suffix = chord.slice(-1);
         if (suffix == 'm') {
           chord = chord.slice(0, -1);
@@ -685,7 +739,7 @@ function loadNoteModal(block) {
         }
       }
       if (section == 'notes') {
-        if (scale_notes.includes(sound)) {
+        if (scale_notes.includes(sound.split('-')[0])) {
           button.addClass('highlight');
         }
       }
@@ -718,14 +772,18 @@ function loadNoteModal(block) {
 
                 block.attr("sound", $(this).attr("value"));
                 block.find('.block-label').remove();
-                block.append($('<div/>').text($(this).attr("value").split('/').at(-1)).addClass('block-label'));
+                block.append($('<div/>').text($(this).attr("value").split('/').at(-1).split('-')[0]).addClass('block-label'));
                 arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
 
+                if (inst_data[block.attr('inst')].type == 'melodic') {
+                  block.find('.block-octave-span').show()
+                }
+
                 if ($(this).attr("value").split('/')[0] == 'chords') {
-                  block.find('.block-chord-symbol').css({'display': 'block'});
+                  block.find('.block-chord-symbol').show();
                 }
                 else {
-                  block.find('.block-chord-symbol').css({'display': 'none'});
+                  block.find('.block-chord-symbol').hide();
                 }
               }
             }
@@ -926,3 +984,17 @@ function getScale() {
 function transposeToScale() {
   return
 }
+
+
+function generateAddLineDropdown() {
+  for (let inst in inst_data) {
+    let button = $('<button/>');
+    button.addClass('dropdown-item')
+	.bind("click", function() {
+	  addLine(inst)
+	})
+	.html(capitalize(inst));
+    $('#add-inst-dropdown-menu').append(button);
+  }
+}
+

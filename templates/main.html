@@ -64,9 +64,7 @@
     </div>
 
     <span id="tempo-span">120</span>
-    <input id="tempo-input"  type="number" value="">
-
-    <span class="hidden"><span>Tempo</span></span>
+    <input id="tempo-input" type="number" value="">
 
     <div class="tempo-change" value="plus">
       <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
@@ -127,10 +125,12 @@
     Add New Track
   </div>
 
-  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="add-inst-dropdown-menu">
+<!--
     {% for inst in insts -%}
       <button class="dropdown-item" onclick="addLine('{{inst}}')">{{inst|capitalize}}</button>
     {%- endfor %}
+-->
   </div>
 </div>
 </div>

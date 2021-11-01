@@ -117,7 +117,7 @@ function load_line(line, index, volume, seq_start_time){
 
         let start_time = line_start_time + eighthNoteTime * 0.5 * (block['grid-start'] - 1);
         end_time = start_time + eighthNoteTime * 2 * block["length"];
-        loadOffline(buffer, start_time, end_time, volume, lineCtx);
+        loadBlockOffline(buffer, start_time, end_time, volume, lineCtx);
       }
     }
 
@@ -170,7 +170,7 @@ function playFull(seq_start_time){
   });
 }
 
-function loadOffline(buffer, time, end_time, volume, ctx) {
+function loadBlockOffline(buffer, time, end_time, volume, ctx) {
   let source = ctx.createBufferSource();
   let offlinegainNode = ctx.createGain();
   offlinegainNode.gain.value = 1;

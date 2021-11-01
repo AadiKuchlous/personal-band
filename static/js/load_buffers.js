@@ -72,7 +72,7 @@ function generateBufferList(input, path, context) {
 
 var context;
 
-function init() {
+function loadAllBuffers() {
 //  try {
     // Fix up for prefixing
     window.AudioContext = window.AudioContext||window.webkitAudioContext;
