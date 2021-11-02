@@ -27,7 +27,7 @@ var scale_chords = [];
 $(document).ready(function(){
   loadAllBuffers();
   $(this).keydown(function(e) {
-    if (e.which == 8) {
+    if (e.which == 8 && !($(':focus').hasClass('block-octave-change'))) {
       e.preventDefault();
       let line_pos = parseInt(selected_block.parent('.inst-line').attr('position'));
       let block_pos = parseInt(selected_block.attr('position'));
@@ -36,7 +36,7 @@ $(document).ready(function(){
     }
 
     // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
-    if (e.which == 39) {
+    if (e.which == 39 && !($(':focus').hasClass('block-octave-change'))) {
       if (!playing) {
       e.preventDefault();
         if (event.shiftKey) {
@@ -47,7 +47,7 @@ $(document).ready(function(){
         }
       }
     }
-    if (e.which == 37) {
+    if (e.which == 37 && !($(':focus').hasClass('block-octave-change'))) {
       if (!playing) {
         e.preventDefault();
       
@@ -532,14 +532,16 @@ function addblock(inst, id, from_load) {
     }
   }
 
-  block.click(function() {
+  block.click(function(e) {
     if ($(this).hasClass('block-selected')) {
       $(this).removeClass('block-selected');
       selected_block = null;
     }
     else {
-      $( this ).addClass('block-selected');
-      selected_block = $(this);
+      if (!($(e.target).hasClass('block-octave-span'))) {
+        $( this ).addClass('block-selected');
+        selected_block = $(this);
+      }
     }
     $('.inst-block').not(this).removeClass('block-selected');
     $(this).find('.block-del').css({'display': 'flex'});
@@ -570,11 +572,15 @@ function addblock(inst, id, from_load) {
   if (inst_data[inst].type == 'melodic') {
     octave_span = $('<span/>').addClass('block-octave-span').css({'order': '10'}).text('2')
 	  .click(function() {
-	    $(this).siblings('.block-octave-change').show().focus().select().attr('value', $(this).text()).width($(this).width())
+	    $(this).siblings('.block-octave-change').show().focus().select().val($(this).text()).attr('value', $(this).text()).width($(this).width())
 	    $(this).hide()
 	  });
+
+    let min = parseInt(inst_data[inst].range.split('-')[0]);
+    let max = parseInt(inst_data[inst].range.split('-')[1]);
+
     octave_input = $('<input/>').attr('type', 'number').addClass('block-octave-change').css({'order': '10'})
-    .attr('min', inst_data[inst].range.split('-')[0]).attr('max', inst_data[inst].range.split('-')[1]).attr('step', '1')
+    .attr('min', min).attr('max', max).attr('step', '1')
     .keyup(function(e){
       if (e.which == 13) {
         e.preventDefault();
@@ -582,7 +588,15 @@ function addblock(inst, id, from_load) {
       }
     }).on('blur', function(){
         $(this).hide();
-        $(this).siblings('.block-octave-span').show().text($(this).val());
+        let input_val = parseFloat($(this).val());
+        if (input_val < min || input_val > max || input_val !== parseInt($(this).val())) {
+          $(this).siblings('.block-octave-span').show();
+          $(this).val($(this).siblings('.block-octave-span').text()).attr('value', $(this).siblings('.block-octave-span').text())
+          return
+        }
+
+        $(this).siblings('.block-octave-span').show();
+        $(this).siblings('.block-octave-span').text($(this).val());
 
         let line = $(this).parents('.inst-line');
 
