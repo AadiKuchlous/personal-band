@@ -149,6 +149,15 @@ $(document).ready(function(){
   getScale();
 
   generateAddLineDropdown();
+
+  window.scrollTo({'top': '32'})
+
+  $(window).scroll(function(event) {
+    if ($(window).scrollTop() <= 32) {
+      window.scrollTo({'top': '32'})
+    }
+  })
+
 })
 
 
@@ -363,23 +372,39 @@ function addLine(inst, from_load=null) {
   track_header.append(volume_knob);
 
   track_header.append(
-	$('<div/>')
-	.addClass('line-del')
-	.html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16" height="16" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="del-line-path"><path d="M107.33488,86l46.8872,-70.3308c0.70176,-1.05608 0.77056,-2.41144 0.172,-3.52944c-0.59856,-1.118 -1.76472,-1.81976 -3.03408,-1.81976h-25.2496c-1.12488,0 -2.18096,0.5504 -2.82424,1.47576l-37.28616,53.56424l-37.2896,-53.56424c-0.64328,-0.92536 -1.69592,-1.47576 -2.8208,-1.47576h-25.2496c-1.26936,0 -2.43552,0.69832 -3.03408,1.81632c-0.59856,1.118 -0.52976,2.4768 0.172,3.52944l46.8872,70.33424l-46.8872,70.3308c-0.70176,1.05608 -0.77056,2.41144 -0.172,3.52944c0.59856,1.118 1.76472,1.81976 3.03408,1.81976h25.2496c1.12488,0 2.18096,-0.5504 2.82424,-1.47576l37.28616,-53.56424l37.2896,53.56424c0.64328,0.92536 1.69592,1.47576 2.8208,1.47576h25.2496c1.26936,0 2.43552,-0.69832 3.03408,-1.81632c0.59856,-1.118 0.52976,-2.4768 -0.172,-3.52944z"></path></g></g></svg>')
-	.click(() => (deleteLine(line)))
+	  $('<div/>')
+	  .addClass('track-header-dropdown')
+	  .html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="25" height="25" viewBox="0 0 30 30" style=" fill:#000000;" class="track-header-dropdown-icon"><path d="M 15 4 A 3 3 0 0 0 12 7 A 3 3 0 0 0 15 10 A 3 3 0 0 0 18 7 A 3 3 0 0 0 15 4 z M 15 12 A 3 3 0 0 0 12 15 A 3 3 0 0 0 15 18 A 3 3 0 0 0 18 15 A 3 3 0 0 0 15 12 z M 15 20 A 3 3 0 0 0 12 23 A 3 3 0 0 0 15 26 A 3 3 0 0 0 18 23 A 3 3 0 0 0 15 20 z"></path></svg>')
+	  .attr('data-toggle', 'dropdown')
+	  .attr('aria-haspopup', 'true')
+	  .attr('aria-expanded', 'false')
   );
 
+  track_header.append(
+	$('<div/>')
+	.addClass('dropdown-menu')
+	.addClass('dropdown-menu-end')
+	.attr('aria-labelledby', 'dropdownMenuButton')
+  );
+
+  track_header.find('.dropdown-menu').append(
+	$('<button/>')
+	.addClass('dropdown-item')
+	.text('Delete')
+	.click(() => (deleteLine(line)))	
+  )
+
   track_header.hover(function (){
-	  $(this).find('.line-del').css({'display': 'flex'})
+	  $(this).find('.track-header-dropdown').css({'display': 'flex'})
 	}, 
 	function (){
-	  $(this).find('.line-del').css({'display': 'none'})
+	  $(this).find('.track-header-dropdown').css({'display': 'none'})
 	}
   );
 
   $('#track-list-grid').append(track_header)
 
-  $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
+  $('.track-header-dropdown-icon').css({'fill': theme_obj["del-line-color"]});
 
   if (!grid_drawn){
     $('#grid-canvas').attr('height', '120px');
@@ -873,6 +898,7 @@ function loadSettings() {
 
 function changeTheme() {
   $('#control-bar').css({'background-color': theme_obj['control-bar-background']});
+  $('#block').css({'background-color': theme_obj['studio-background']})
   $('#studio-body').css({'background-color': theme_obj['studio-background']});
   $('#track-list').css({'background-color': theme_obj['studio-background']});
   $('#arrange-area').css({'background-color': theme_obj['studio-background']});
@@ -902,7 +928,7 @@ function changeTheme() {
   
   $('.key-change').css({'color': theme_obj['text-color']});
 
-  $('.del-line-path').css({'fill': theme_obj["del-line-color"]});
+  $('.track-header-dropdown-icon').css({'fill': theme_obj["del-line-color"]});
 
   $('#number-area').css({'background-color': theme_obj['studio-background']});
   $('#download-svg-path').css({'fill': theme_obj["del-line-color"]});
