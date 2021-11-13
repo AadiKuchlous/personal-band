@@ -57,7 +57,7 @@ body {
 
 .inst-line {
   display: grid;
-  grid-template-columns: repeat(10000, 25px);
+  grid-template-columns: repeat(20000, 25px);
   align-items: center;
   height: 120px;
   border-bottom: 1px solid rgb(0 0 255 / 25%);
@@ -104,7 +104,8 @@ body {
   height: 100vh;
   position: relative;
   background-color: #000000;
-  width: 100000px;
+  width: 51000px;
+  width: fit-content;
 }
 
 #track-list {
@@ -236,6 +237,7 @@ input[type=number]::-webkit-inner-spin-button {
   margin: 5px;
   border: 2px solid rgb(118, 118, 118);
   cursor: pointer;
+  user-select: none;
 }
 
 #SettingsButton {
@@ -293,6 +295,7 @@ img.block-chord-symbol {
 
 .block-octave-span {
   display: none;
+  cursor: text;
 }
 
 .block-octave-change {
@@ -307,4 +310,47 @@ img.block-chord-symbol {
     top: 50px;
     left: 0px;
     z-index: 103;
+}
+
+.nav-item {
+  flex-grow: 1;
+  user-select: none;
+}
+
+button.nav-link {
+  width: 100%;
+}
+
+#noteModal .container.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.note-selector-octave-div {
+//  background: black;
+  height: fit-content;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  user-select: none;
+}
+
+.note-selector-octave-change-div {
+  height: 20px;
+}
+
+#transpose-line-footer, #delete-line-footer {
+  display: none;
+}
+
+.show-footer {
+  display: block !important;
+}
+
+#transpose-line.active {
+  display: flex;
 }

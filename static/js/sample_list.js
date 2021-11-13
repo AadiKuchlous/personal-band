@@ -122,6 +122,7 @@ const fileList = {
 		"B-2": "B-2.wav",
 	    },
         },
+
 	"drums": {
 	    "kick": {
 		"Kick 1": "kick1.wav",
@@ -144,11 +145,13 @@ const fileList = {
 const inst_data = {
 	'piano': {
 		'type': 'melodic',
-		'range': '1-4'
+		'range-notes': '1-4',
+		'range-chords': '2-2'
 	},
 	'guitar': {
 		'type': 'melodic',
-		'range': '2-2'
+		'range-notes': '2-2',
+		'range-chords': '2-2'
 	},
 	'drums': {
 		'type': 'rythmic'

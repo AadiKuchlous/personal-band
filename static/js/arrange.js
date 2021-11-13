@@ -4,7 +4,7 @@ let selected_block = null;
 let quarter_note_block_width = 100;
 let theme = "dark";
 let theme_obj = themes[theme];
-var line_to_delete = null;
+var line_to_edit = null;
 var playhead_position = 0;
 var keys = {
 	"types": {
@@ -36,7 +36,7 @@ $(document).ready(function(){
     }
 
     // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
-    if (e.which == 39 && !($(':focus').hasClass('block-octave-change'))) {
+    if (e.which == 39 && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       if (!playing) {
       e.preventDefault();
         if (event.shiftKey) {
@@ -47,7 +47,7 @@ $(document).ready(function(){
         }
       }
     }
-    if (e.which == 37 && !($(':focus').hasClass('block-octave-change'))) {
+    if (e.which == 37 && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       if (!playing) {
         e.preventDefault();
       
@@ -86,10 +86,7 @@ $(document).ready(function(){
   $('#load-project').click((() => {loadProject(sample_project)}));
 
   $('.tempo-change').on("click", (e) => {
-    let clicked = $(e.target);
-    if (!clicked.hasClass('tempo-change')) {
-      clicked = clicked.closest('.tempo-change');
-    }
+    let clicked = $(e.currentTarget);
     let tempo_span = $('#tempo-span');
     let tempo_input = $('#tempo-input');
     let increment = 1;
@@ -102,6 +99,7 @@ $(document).ready(function(){
     tempo_span.text(parseInt(tempo_span.text()) + increment);
     tempo_input.attr('value', tempo_span.text());
   })
+
   $('.tempo').hover( function (){
 	  $('#tempo-label').css({'display': 'flex'})
 	}, 
@@ -110,7 +108,34 @@ $(document).ready(function(){
 	}
   );
 
+  $('.transpose-button').on("click", (e) => {
+    let clicked = $(e.currentTarget);
+    let increment = 1;
+    if (clicked.attr('value') == "plus") {
+      increment = 1;
+    }
+    else if (clicked.attr('value') == "minus") {
+      increment = -1;
+    }
+    changeTransposeValue(increment)
+  })
+
+  $('#transpose-line-button').click(function(){
+    transposeLine($('#lineSettingsModal').find('.transpose-value').text());
+  })
+
   $('#SettingsButton').click(loadSettings);
+
+  $('#lineSettingsModal').find('[data-target="#transpose-line"]').click(
+    function() {
+      $('#transpose-line-footer').addClass('show-footer').siblings().removeClass('show-footer');
+    }
+  )
+  $('#lineSettingsModal').find('[data-target="#delete-line"]').click(
+    function() {
+      $('#delete-line-footer').addClass('show-footer').siblings().removeClass('show-footer');
+    }
+  )
 
   $('#themeSelector').change(function() {
     theme = $("input[name='theme']:checked").val();
@@ -387,6 +412,14 @@ function addLine(inst, from_load=null) {
 	.attr('aria-labelledby', 'dropdownMenuButton')
   );
 
+  if (inst_data[inst].type == 'melodic'){
+    track_header.find('.dropdown-menu').append(
+	  $('<button/>')
+	  .addClass('dropdown-item')
+	  .text('Transpose Line')
+	  .click(() => (showLineMenu(line)))
+    )
+  }
   track_header.find('.dropdown-menu').append(
 	$('<button/>')
 	.addClass('dropdown-item')
@@ -428,14 +461,74 @@ function instLineHoverOut (){
 }
 
 
+function showLineMenu(line) {
+  line_to_edit = line.attr('id');
+  $('#lineSettingsModal').modal('show');
+  $('#lineSettingsModal').find('[data-target="#transpose-line"]').tab('show');
+  $('#transpose-line-footer').addClass('show-footer').siblings().removeClass('show-footer');
+}
+
+
+function changeTransposeValue(increment) {
+  let modal = $('#lineSettingsModal');
+  let span = modal.find('.transpose-value');
+  let old_value = parseInt(span.text());
+  let new_value = old_value + increment;
+  if (new_value > 0) {
+    span.text('+' + new_value);
+  }
+  else {
+    span.text(new_value);
+  }
+}
+
+
+function transposeLine(increment){
+  increment = parseInt(increment)
+  $('#' + line_to_edit).find('.inst-block').each(function() {
+    let line_index = parseInt($(this).parents('.inst-line').attr('position'));
+    let block_index = parseInt($(this).attr('position'));
+    let block_obj = arrange_data.lines[line_index].blocks[block_index];
+    let block = $(this).attr('sound');
+    let value = block.split('/').at(-1);
+    let sound_type = block.split('/')[0];
+    let chord_suffix = '';
+    if (sound_type == 'chords') {
+      chord_suffix = value.at(-1);
+      value = value.slice(0, -1);
+    }
+    let octave = parseInt($(this).attr('octave'));
+    let note_index = keys.notes.indexOf(value);
+    let new_note_index = (note_index + increment);
+    if (new_note_index < 0) {
+      new_note_index = keys.notes.length + new_note_index;
+      octave -= 1;
+    }
+    if (new_note_index >= keys.notes.length) { 
+      new_note_index = keys.notes.length % keys.notes.length;
+      octave += 1;
+    }
+    let new_note = keys.notes[new_note_index];
+    let new_sound = sound_type + '/' + new_note + chord_suffix;
+    block_obj.octave = octave;
+    block_obj.sound = new_sound;
+    $(this).find('.block-label').text(new_note + chord_suffix);
+    $(this).find('.block-octave-span').text(octave);
+    $(this).attr('sound', new_sound)
+  })
+}
+
+
 function deleteLine(line) {
-  line_to_delete = line;
-  $('#deleteLineModal').modal('show');
+  line_to_edit = line.attr('id');
+  $('#lineSettingsModal').modal('show');
+  $('#lineSettingsModal').find('[data-target="#delete-line"]').tab('show');
+  $('#delete-line-footer').addClass('show-footer').siblings().removeClass('show-footer');
 }
 
 
 function confirmDeleteLine() {
-  let index = parseInt(line_to_delete.attr('position'));
+  let index = parseInt($('#'+line_to_edit).attr('position'));
   arrange_data['lines'].splice(index, 1);
 /*
   if (arrange_data['lines'].length == 0) {
@@ -601,11 +694,13 @@ function addblock(inst, id, from_load) {
 	    $(this).hide()
 	  });
 
-    let min = parseInt(inst_data[inst].range.split('-')[0]);
-    let max = parseInt(inst_data[inst].range.split('-')[1]);
+    if (from_load) {
+      octave_span.text(block_data_obj.octave);
+      block.attr('octave', block_data_obj.octave);
+    }
 
     octave_input = $('<input/>').attr('type', 'number').addClass('block-octave-change').css({'order': '10'})
-    .attr('min', min).attr('max', max).attr('step', '1')
+    .attr('step', '1')
     .keyup(function(e){
       if (e.which == 13) {
         e.preventDefault();
@@ -614,18 +709,36 @@ function addblock(inst, id, from_load) {
     }).on('blur', function(){
         $(this).hide();
         let input_val = parseFloat($(this).val());
-        if (input_val < min || input_val > max || input_val !== parseInt($(this).val())) {
+        if (input_val !== parseInt($(this).val())) {
           $(this).siblings('.block-octave-span').show();
           $(this).val($(this).siblings('.block-octave-span').text()).attr('value', $(this).siblings('.block-octave-span').text())
           return
         }
+        if (input_val < parseInt($(this).attr('min'))) {
+          $(this).siblings('.block-octave-span').show();
+          $(this).val($(this).attr('min')).attr('value', $(this).attr('min'));
+          $(this).siblings('.block-octave-span').text($(this).val());
+          return
+        }
+        if (input_val > parseInt($(this).attr('max'))) {
+          $(this).siblings('.block-octave-span').show();
+          $(this).val($(this).attr('max')).attr('value', $(this).attr('max'));
+          $(this).siblings('.block-octave-span').text($(this).val());
+          return
+        }
+
+        $(this).parent('.inst-block').attr('octave', input_val);
+
+        let line_index = parseInt($(this).parents('.inst-line').attr('position'));
+        let block_index = parseInt($(this).parents('.inst-block').attr('position'));
+        arrange_data.lines[line_index].blocks[block_index].octave = input_val;
 
         $(this).siblings('.block-octave-span').show();
         $(this).siblings('.block-octave-span').text($(this).val());
 
         let line = $(this).parents('.inst-line');
 
-        block.attr('sound', block.attr('sound').split('-')[0] + '-' + $(this).val());
+        block.attr('sound', block.attr('sound').split('-')[0]);
         arrange_data['lines'][parseInt(line.attr('position'))]['blocks'][parseInt(block.attr('position'))]['sound'] = block.attr('sound');
       });
 
@@ -667,7 +780,7 @@ function addblock(inst, id, from_load) {
       block_obj['octave'] = 2;
     }
     else {
-      block_obj['octave'] = 0;
+      block_obj['octave'] = null;
     }
 
     let notes_modal = $("#noteModal .modal-body")
@@ -689,6 +802,7 @@ function blockHoverOut() {
 
 
 function loadNoteModal(block) {
+  let current_octave = null;
   let modal_body = $("#noteModal .modal-body");
   let modal_title = $("#noteModalTitle");
   // Clear the modal
@@ -731,24 +845,102 @@ function loadNoteModal(block) {
 				  .attr('id', 'nav-'+section)
 				  .addClass('tab-pane')
 				  .attr('role', 'tabpanel')
+
+    if (inst_data[block.attr('inst')].type == 'melodic') {
+      current_octave = 2;
+      let oct_change_div = $('<div/>').addClass('note-selector-octave-div');
+
+      let octave_span = $('<span/>').css({'color': 'white', 'font-size': '21.5px'});
+
+      let range = inst_data[block.attr('inst')]['range-'+section].split('-');
+      let min = parseInt(range[0]);
+      let max = parseInt(range[1]);      
+      if (block.attr('sound')) {
+        let block_oct = parseInt(block.attr('octave'));
+        if (block_oct > max) {
+          octave_span.text(max);
+        }
+        else if (block_oct < min) {
+          octave_span.text(min);
+        }
+        else {
+          octave_span.text(block.attr('octave'));
+        }
+      }
+      else {
+        octave_span.text('2');
+      }
+      $('#noteModal').attr('octave', octave_span.text());
+
+      let minus_div = $('<div/>').addClass('note-selector-octave-change-div')
+	.html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="tempo-change-path" fill="#ffffff" style="fill: rgb(255, 255, 255);"><path d="M21.5,78.83333v14.33333h129v-14.33333z"></path></g></g></svg>')
+	.on('click', (e) => {
+	  let new_oct = parseInt(octave_span.text())-1;
+          let min = parseInt(inst_data[block.attr('inst')]['range-' + $(e.target).parents('.tab-pane').attr('id').split('-')[1]].split('-')[0]);
+	  if (new_oct >= min) {
+	    octave_span.text(new_oct);
+	    $('#noteModal').attr('octave', new_oct);
+            $('#noteModal').find('.note-button').each(
+              function() {
+                $(this).css({'border-color': '#767676'});
+                if (block.attr('octave') == $('#noteModal').attr('octave')) {
+                  if (block.attr('sound') == $(this).attr('value')) {
+                    $(this).css({'border-color': 'blue'});
+                  }
+                }
+              }
+            );
+	  }
+	});
+      let plus_div = $('<div/>').addClass('note-selector-octave-change-div')
+	.html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="tempo-change-path" fill="#ffffff" style="fill: rgb(255, 255, 255);"><path d="M78.83333,21.5v57.33333h-57.33333v14.33333h57.33333v57.33333h14.33333v-57.33333h57.33333v-14.33333h-57.33333v-57.33333z"></path></g></g></svg>')
+	.on('click', (e) => {
+	  let new_oct = parseInt(octave_span.text())+1;
+          let max = parseInt(inst_data[block.attr('inst')]['range-' + $(e.target).parents('.tab-pane').attr('id').split('-')[1]].split('-')[1]);
+	  if (new_oct <= max) {
+	    octave_span.text(new_oct);
+	    $('#noteModal').attr('octave', new_oct);
+            $('#noteModal').find('.note-button').each(
+              function() {
+                $(this).css({'border-color': '#767676'});
+                if (block.attr('octave') == $('#noteModal').attr('octave')) {
+                  if (block.attr('sound') == $(this).attr('value')) {
+                    $(this).css({'border-color': 'blue'});
+                  }
+                }
+              }
+            );
+	  }
+	});
+      oct_change_div.append(minus_div);
+      oct_change_div.append(octave_span);
+      oct_change_div.append(plus_div);
+      container.append(oct_change_div);
+    }
+
+
     let buttons_area = $('<div/>').addClass('row').addClass('justify-content-around')
 
     Object.entries(sounds[section]).forEach(function ([sound, file], index) {
 
-     if (inst_data[block.attr('inst')].type == 'melodic') {
-       if (sound.slice(-1) !== '2') {
-         return
-       }
-     }
+      if (inst_data[block.attr('inst')].type == 'melodic') {
+        if (parseInt(sound.slice(-1)) !== current_octave) {
+          return
+        }
+      }
 
       let button = $('<div/>').addClass('col-5')
 				 .attr('value', section+'/'+sound)
 				 .html(sound.split('-')[0])
 				 .addClass('note-button')
-				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color'], 'user-select': 'none'})
+				 .css({'background': theme_obj['note-select-button-color'], 'color': theme_obj['text-color']})
+
+      if (inst_data[block.attr('inst')].type == 'melodic') {
+        button.attr('value', section+'/'+sound.split('-')[0])
+      }
 
       try {
-        if (block.attr('sound').split('/')[1] == sound && block.attr('sound').split('/')[0] == section) {
+        if (block.attr('sound') == button.attr('value') && block.attr('octave') == $('#noteModal').attr('octave')) {
           button.css({'border-color': 'blue'});
         }
       } catch (error) {}
@@ -808,11 +1000,17 @@ function loadNoteModal(block) {
               if (e.target == this) {
                 modal_body.find(".note-button").css({'border-color': '#767676'});
                 $(this).css({'border-color': 'blue'});
+                let old_value = $(this).attr('value');
+//                $(this).attr('value', old_value);
 
                 block.attr("sound", $(this).attr("value"));
-                block.find('.block-label').remove();
+                block.find('.block-label').remove()
                 block.append($('<div/>').text($(this).attr("value").split('/').at(-1).split('-')[0]).addClass('block-label'));
-                arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]["sound"] = $(this).attr("value");
+                let block_obj = arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]
+                block_obj.sound = $(this).attr("value");
+                block_obj.octave = $('#noteModal').attr('octave');
+                block.attr('octave', $('#noteModal').attr('octave'));
+                block.find('.block-octave-span').text($('#noteModal').attr('octave'));
 
                 if (inst_data[block.attr('inst')].type == 'melodic') {
                   block.find('.block-octave-span').show()
@@ -824,6 +1022,13 @@ function loadNoteModal(block) {
                 else {
                   block.find('.block-chord-symbol').hide();
                 }
+
+                let inst = block.parent('.inst-line').attr('id').split('-')[0];
+                let sound_type = block.attr('sound').split('/')[0];
+                let min = parseInt(inst_data[inst]['range-' + sound_type].split('-')[0]);
+                let max = parseInt(inst_data[inst]['range-' + sound_type].split('-')[1]);
+                block.find('.block-octave-change').attr('min', min).attr('max', max);
+
               }
             }
           )
@@ -839,7 +1044,8 @@ function loadNoteModal(block) {
         (() => {
           return(
             function() {
-              levels = $(this).parent().attr('value').split('/');
+              let sound = $(this).parent().attr('value') + '-' + $('#noteModal').attr('octave'); 
+              levels = sound.split('/');
               let instrument_tree = bufferlist[modal_body.attr('inst')];
               let buffer = instrument_tree;
               // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated

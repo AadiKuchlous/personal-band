@@ -105,8 +105,12 @@ function load_line(line, index, volume, seq_start_time){
     let line_start_time = 0;
     for (var i = 0; i < blocks.length; i++) {
       block = blocks[i];
-      if (block['sound'] !== '') {
-        levels = block['sound'].split('/');
+      let sound = block['sound'];
+      if (sound !== '') {
+        if (inst_data[inst].type == 'melodic') {
+          sound = sound + '-' + block.octave;
+        }
+        levels = sound.split('/');
         let buffer = instrument_tree;
         // The buffers are kept as a tree of dictionaries, and the levels are a '/' separated
         // path in this tree. Example: 'Notes/A'
