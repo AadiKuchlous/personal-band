@@ -919,7 +919,7 @@ function loadNoteModal(block) {
     }
 
 
-    let buttons_area = $('<div/>').addClass('row').addClass('justify-content-around')
+    let buttons_area = $('<div/>').addClass('row').addClass('justify-content-around').addClass('button-row');
 
     Object.entries(sounds[section]).forEach(function ([sound, file], index) {
 
@@ -1014,6 +1014,12 @@ function loadNoteModal(block) {
 
                 if (inst_data[block.attr('inst')].type == 'melodic') {
                   block.find('.block-octave-span').show()
+                  let inst = block.parent('.inst-line').attr('id').split('-')[0];
+                  let sound_type = block.attr('sound').split('/')[0];
+                  let min = parseInt(inst_data[inst]['range-' + sound_type].split('-')[0]);
+                  let max = parseInt(inst_data[inst]['range-' + sound_type].split('-')[1]);
+                  block.find('.block-octave-change').attr('min', min).attr('max', max);
+
                 }
 
                 if ($(this).attr("value").split('/')[0] == 'chords') {
@@ -1022,13 +1028,6 @@ function loadNoteModal(block) {
                 else {
                   block.find('.block-chord-symbol').hide();
                 }
-
-                let inst = block.parent('.inst-line').attr('id').split('-')[0];
-                let sound_type = block.attr('sound').split('/')[0];
-                let min = parseInt(inst_data[inst]['range-' + sound_type].split('-')[0]);
-                let max = parseInt(inst_data[inst]['range-' + sound_type].split('-')[1]);
-                block.find('.block-octave-change').attr('min', min).attr('max', max);
-
               }
             }
           )
