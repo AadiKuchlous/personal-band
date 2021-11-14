@@ -16,6 +16,7 @@
 
 <link rel="stylesheet" href="{{url_for('static', filename='css/arrange.css')}}">
 
+<script src="{{url_for('static', filename='js/svg.js')}}"></script>
 <script src="{{url_for('static', filename='js/buffer_to_wav.js')}}"></script>
 <script src="{{url_for('static', filename='js/sample_list.js')}}"></script>
 <script src="{{url_for('static', filename='js/load_buffers.js')}}"></script>
@@ -42,7 +43,7 @@
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#cccccc"><path d="M75.18001,14.33333c-3.43283,0 -6.36736,2.42659 -7.02669,5.79492l-2.39355,12.28971c-5.8821,2.22427 -11.32102,5.33176 -16.097,9.25228l-11.78581,-4.05924c-3.2465,-1.118 -6.81841,0.22441 -8.53841,3.19141l-10.80599,18.72852c-1.71283,2.97417 -1.08945,6.74999 1.49772,9.00033l9.44824,8.21647c-0.49137,3.0197 -0.81185,6.09382 -0.81185,9.25228c0,3.15846 0.32048,6.23258 0.81185,9.25228l-9.44824,8.21647c-2.58717,2.25033 -3.21055,6.02616 -1.49772,9.00032l10.80599,18.72852c1.71283,2.97417 5.29191,4.31623 8.53841,3.2054l11.78581,-4.05924c4.77441,3.91806 10.21756,7.01501 16.097,9.23828l2.39355,12.28972c0.65933,3.36833 3.59386,5.79492 7.02669,5.79492h21.63998c3.43283,0 6.36735,-2.42659 7.02669,-5.79492l2.39356,-12.28972c5.88211,-2.22427 11.32102,-5.33176 16.097,-9.25227l11.78581,4.05924c3.2465,1.118 6.81841,-0.21724 8.53841,-3.1914l10.80599,-18.74252c1.71284,-2.97417 1.08945,-6.73599 -1.49772,-8.98633l-9.44824,-8.21647c0.49137,-3.0197 0.81185,-6.09382 0.81185,-9.25228c0,-3.15846 -0.32048,-6.23258 -0.81185,-9.25228l9.44824,-8.21647c2.58717,-2.25033 3.21056,-6.02616 1.49772,-9.00033l-10.80599,-18.72852c-1.71283,-2.97417 -5.29191,-4.31624 -8.53841,-3.2054l-11.78581,4.05924c-4.7744,-3.91806 -10.21755,-7.01501 -16.097,-9.23828l-2.39356,-12.28971c-0.65933,-3.36833 -3.59385,-5.79492 -7.02669,-5.79492zM86,57.33333c15.83117,0 28.66667,12.8355 28.66667,28.66667c0,15.83117 -12.8355,28.66667 -28.66667,28.66667c-15.83117,0 -28.66667,-12.8355 -28.66667,-28.66667c0,-15.83117 12.8355,-28.66667 28.66667,-28.66667z"></path></g></g></svg>
   </div>
 
-  <div class="playback-button" onclick="stopSound()">
+  <div class="playback-button" onclick="stopSound()" id="playback-button-stop">
     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
       width="35" height="35"
       viewBox="0 0 172 172" class="playback-button-svg"
@@ -50,12 +51,8 @@
     </svg>
   </div>
 
-  <div class="playback-button" onclick="play()">
-    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-      width="48" height="48"
-      viewBox="0 0 24 24" class="playback-button-svg"
-      style=" fill:#000000;">    <path d="M8,6.822v10.357c0,0.789,0.871,1.267,1.537,0.844l8.137-5.178c0.618-0.393,0.618-1.294,0-1.687L9.537,5.978 C8.871,5.554,8,6.033,8,6.822z"></path>
-    </svg>
+  <div class="playback-button" onclick="play()" id="playback-button-play">
+    <img style="width:80%; border-radius:50%;" src="{{url_for('static', filename='loading.gif')}}"></img>
   </div>
 
   <div class="heading-and-button tempo" title="Edit tempo" style="user-select: none; touch-action: pan-y; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); display:flex; align-items: center; justify-centent: center; margin-left: 25px;">

@@ -1,3 +1,9 @@
+// loaded buffers will only catch up to total buffers
+// in the end because total buffers in inremented
+// intintaneously
+let total_buffers = 0;
+let loaded_buffers = 0;
+
 //Defining BufferLoader class
 function BufferLoader(context, urlList, callback) {
   this.context = context;
@@ -56,11 +62,13 @@ function generateBufferList(input, path, context) {
     }
     else {
       audio_path = path+'/'+input[key];
+      total_buffers += 1;
       let bufferLoader = new BufferLoader(
           context, [audio_path],
 	  ((key) => {
             return function(bufferList){
               buffers_new[key] = bufferList[0];
+              checkForFinalBuffer();
             }
 	  })(key)
       );
@@ -91,3 +99,13 @@ function loadBuffers(context, audio_location) {
   bufferlist = generateBufferList(fileList, audio_location, context);
 }
 
+function checkForFinalBuffer() {
+  loaded_buffers += 1;
+  if (loaded_buffers == total_buffers) {
+    console.log("Final Loaded")
+    $('#playback-button-play').html(play_button_svg);
+  }
+  else {
+    console.log(loaded_buffers, total_buffers)
+  }
+}
