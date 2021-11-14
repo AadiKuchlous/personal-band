@@ -11,5 +11,5 @@ app.config['TESTING'] = True
 
 @app.route("/")
 def hello():
-  paths = Path(dir) / 'static' / 'audio_files'
+#  paths = Path(dir) / 'static' / 'audio_files'
   return render_template("main.html")
