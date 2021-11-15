@@ -33,6 +33,7 @@ body {
   text-align: center;
   border-top: 1px solid lightgray;
   border-bottom: 1px solid lightgray;
+  user-select: none;
 }
 
 #dropdownMenuButton:hover {
@@ -145,6 +146,7 @@ body {
   border-top: 1px solid lightgray;
   border-bottom: 1px solid lightgray;
   position: relative;
+  user-select: none;
 }
 
 .hidden {
@@ -294,11 +296,13 @@ img.block-chord-symbol {
   top: 3px;
   left: 3px;
   display: none;
+  user-select: none;
 }
 
 .block-octave-span {
   display: none;
   cursor: text;
+  user-select: none;
 }
 
 .block-octave-change {
@@ -306,7 +310,7 @@ img.block-chord-symbol {
 }
 
 #block {
-    background: white;
+    backgronund: white;
     height: 32px;
     width: 200px;
     position: sticky;

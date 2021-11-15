@@ -1,6 +1,7 @@
 let arrange_data = {'lines':[], 'length':0, 'tempo':120};
 let block_length_options = ['1/16', '1/8', '1/4', '1/2', '1']
-let selected_block = null;
+let selected_blocks = [];
+let clipboard = [];
 let quarter_note_block_width = 100;
 let theme = "dark";
 let theme_obj = themes[theme];
@@ -23,12 +24,19 @@ var scale = ['C', 'major'];
 var scale_notes = [];
 var scale_chords = [];
 
+var delKey = 8,
+    rightKey = 39,
+    leftKey = 37,
+    cKey = 67,
+    vKey = 86
+
 
 $(document).ready(function(){
   loadAllBuffers();
   $(this).keydown(function(e) {
-    if (e.which == 8 && !($(':focus').hasClass('block-octave-change'))) {
+    if (e.which == delKey && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       e.preventDefault();
+      let selected_block = selected_blocks[0];
       let line_pos = parseInt(selected_block.parent('.inst-line').attr('position'));
       let block_pos = parseInt(selected_block.attr('position'));
       arrange_data['lines'][line_pos]['blocks'].splice(block_pos, 1);
@@ -36,7 +44,7 @@ $(document).ready(function(){
     }
 
     // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
-    if (e.which == 39 && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
+    if (e.which == rightKey && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       if (!playing) {
       e.preventDefault();
         if (event.shiftKey) {
@@ -47,7 +55,7 @@ $(document).ready(function(){
         }
       }
     }
-    if (e.which == 37 && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
+    if (e.which == leftKey && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       if (!playing) {
         e.preventDefault();
       
@@ -69,9 +77,10 @@ $(document).ready(function(){
         }
       }
     }
-    
   movePlayhead();
   });
+
+  $(document).bind('copy', copy).bind('paste', paste);
 
   $('#number-area').css({'height': '32px'});
   $('#number-canvas').attr('width', '50000px').attr('height', $('#number-area').height());
@@ -337,6 +346,8 @@ function addLine(inst, from_load=null) {
 	.mousedown(lineMouseDown)
 	.mouseup(lineMouseUp)
 	.mousemove(lineMouseMove);
+  let grid_width = quarter_note_block_width/4;
+  line.css({'grid-template-columns': `repeat(20000, ${grid_width}px)`});
 
   let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
   add_button.click(((inst, id) => {
@@ -531,28 +542,84 @@ function deleteLine(line) {
 function confirmDeleteLine() {
   let index = parseInt($('#'+line_to_edit).attr('position'));
   arrange_data['lines'].splice(index, 1);
-/*
-  if (arrange_data['lines'].length == 0) {
-    grid_drawn = false;
-  }
-*/
+
   loadProject(JSON.stringify(arrange_data));  
   findNewTotalLength();
 }
 
+
+let mouse_down = false;
 let selecting_started = false;
+let select_start_x = 0;
+let select_start_y = 0;
+
 function lineMouseDown(e){
-  selecting_started = true;
-  console.log(e.pageX)
+  mouse_down = true;
+  select_start_x = e.pageX;
+  select_start_y = e.pageY;
+  console.log(select_start_x, select_start_y)
 }
+
 function lineMouseMove(e){
-  if (selecting_started) {
-    console.log('slecting', e.pageX)
+  if (mouse_down) {
+    selecting_started = true;
+
+    mouseX = e.pageX;
+    mouseY = e.pageY;
+
+    let count = 0;
+
+    $('.inst-block').removeClass('block-selected');
+    selected_blocks = [];
+
+    $('.inst-block').each(
+      function() {
+        let x_start = $(this).offset().left;
+        let y_start = $(this).offset().top;
+        let x_end = $(this).width() + x_start;
+        let y_end = $(this).height() + y_start;
+
+        let selectX1 = Math.min(select_start_x, mouseX);
+        let selectX2 = Math.max(select_start_x, mouseX);
+        let selectY1 = Math.min(select_start_y, mouseY);
+        let selectY2 = Math.max(select_start_y, mouseY);
+
+        if ((x_start >= selectX1 && x_start <= selectX2) || (x_end >= selectX1 && x_end <= selectX2) || (x_end >= selectX2 && x_start <= selectX1)) {
+          if ((y_start >= selectY1 && y_start <= selectY2) || (y_end >= selectY1 && y_end <= selectY2) || (y_end >= selectY2 && y_start <= selectY1)) {
+            console.log(selectX1, selectX2)
+            count +=1
+            $(this).addClass('block-selected');
+          }
+        }
+      }
+    )
+    console.log('slecting', count)
   }
 }
+
 function lineMouseUp(e){
+  mouse_down = false;
+  if (selecting_started) {
+    $('.inst-block.block-selected').each(
+      function() {
+        selected_blocks.push($(this));
+      }
+    )
+  }
   selecting_started = false;
-  console.log(e.pageX)
+  console.log(selected_blocks);
+}
+
+
+function copy() {
+  clipboard = selected_blocks;
+}
+
+function paste() {
+  for (i = 0; i < clipboard.length; i++) {
+    let item = clipboard[i];
+    console.log(item);
+  }
 }
 
 
@@ -669,12 +736,12 @@ function addblock(inst, id, from_load) {
   block.click(function(e) {
     if ($(this).hasClass('block-selected')) {
       $(this).removeClass('block-selected');
-      selected_block = null;
+      selected_blocks = [];
     }
     else {
       if (!($(e.target).hasClass('block-octave-span'))) {
         $( this ).addClass('block-selected');
-        selected_block = $(this);
+        selected_blocks = [$(this)];
       }
     }
     $('.inst-block').not(this).removeClass('block-selected');
@@ -1195,8 +1262,6 @@ function generateKeyDropdowns() {
 
 
 function changeKeyNote(button) {
-  console.log(typeof(button))
-  console.log(button)
   $('#key-note-options').find('button').removeClass('active')
   button.addClass('active')
   $('#keyNoteChangeButton').html(button.attr('value'))
@@ -1206,8 +1271,6 @@ function changeKeyNote(button) {
 
 
 function changeKeyType(button) {
-  console.log(typeof(button))
-  console.log(button)
   $('#key-type-options').find('button').removeClass('active')
   button.addClass('active')
   $('#keyTypeChangeButton').html(button.attr('value'))
