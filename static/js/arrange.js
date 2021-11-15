@@ -1243,3 +1243,16 @@ function generateAddLineDropdown() {
   }
 }
 
+
+function zoomHorizontal(type) {
+  let growth_factor = 1;
+  if (type > 0) {
+    growth_factor = 6/4;
+  }
+  else {
+    growth_factor = 3/4;
+  }
+  quarter_note_block_width = growth_factor*quarter_note_block_width;
+
+  resizeHorizontal();
+}

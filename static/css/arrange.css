@@ -17,6 +17,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  user-select: none;
 }
 
 .add-block:hover {
@@ -357,4 +358,11 @@ button.nav-link {
 
 .button-row {
   width: 100%;
+}
+
+#zoom-horizontal {
+  position: fixed;
+  bottom: 0px;
+  right: 0px;
+  user-select: none;
 }

@@ -102,10 +102,9 @@ function loadBuffers(context, audio_location) {
 function checkForFinalBuffer() {
   loaded_buffers += 1;
   if (loaded_buffers == total_buffers) {
-    console.log("Final Loaded")
-    $('#playback-button-play').html(play_button_svg);
+    $('#playback-button-play').html(play_button_svg).on('click', play);
   }
   else {
-    console.log(loaded_buffers, total_buffers)
+    return
   }
 }

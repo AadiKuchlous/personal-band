@@ -1,4 +1,5 @@
 function loadProject(data_string) {
+  console.log("drawing")
   // Parse the json string
   let load_arrange_data = JSON.parse(data_string);
   arrange_data = load_arrange_data;
@@ -14,9 +15,10 @@ function loadProject(data_string) {
   if (arrange_data['lines'].length > 0) {
 
     if (!grid_drawn) {
+      console.log("drawing_grid") 
       //Draw the grid
       $('#grid-canvas').attr('height', '120px');
-      drawGrid('grid-canvas', 25);
+      drawGrid('grid-canvas', quarter_note_block_width/4);
     }
 
     for (i = 0; i < arrange_data['lines'].length; i++){
@@ -38,4 +40,14 @@ function loadProject(data_string) {
     }
   }
   $('#grid-canvas').css({'height': $('#arrange-area').children('.inst-line').length*120 + 'px'});
+}
+
+
+function resizeHorizontal() {
+  let width = quarter_note_block_width/4;
+  console.log(width);
+  drawNumbers('number-canvas', width);
+  console.log(`repeat(20000, ${width} px)`)
+  $('.inst-line').css({'grid-template-columns': `repeat(20000, ${width}px)`});
+  drawGrid('grid-canvas', width);
 }
