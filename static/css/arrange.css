@@ -50,7 +50,6 @@ body {
   align-items: center;
   flex-direction: column;
   justify-content: center;
-  overflow: hidden;
 }
 
 .block-selected{
@@ -168,6 +167,7 @@ body {
   align-self: center;
   margin-left: auto;
   margin-right: auto;
+  overflow: hidden;
 }
 
 #grid-canvas {
