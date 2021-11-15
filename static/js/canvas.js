@@ -39,9 +39,8 @@ function drawNumbers(canvas_id, grid_width){
   let context = canvas[0].getContext('2d');
   context.clearRect(0, 0, width, height);
 
-  for (var x = 0; x <= width; x += grid_width) {
-    if (x<200){ console.log(x)}
-    let i = x / grid_width;
+  for (var i = 0; i <= width / grid_width; i += 1) {
+    let x = i * grid_width;
     let context = canvas[0].getContext('2d');
     context.beginPath();
     context.strokeStyle = 'lightgray';
@@ -52,7 +51,7 @@ function drawNumbers(canvas_id, grid_width){
       context.moveTo(x, 0);
       context.lineTo(x, height);
       context.fillStyle = theme_obj['text-color'];
-      context.fillText((x / (16*grid_width) + 1).toString(), x + 3, height-5);
+      context.fillText(Math.round((i / 16 + 1)).toString(), x + 3, height-5);
     }
     else if (i % 8 == 0) {
       context.strokeStyle = '#bbbbbb';

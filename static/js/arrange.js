@@ -333,7 +333,10 @@ function addLine(inst, from_load=null) {
   line.attr('id', id)
 	.addClass("inst-line")
 	.addClass(inst+'-line')
-	.attr('position', line_no);
+	.attr('position', line_no)
+	.mousedown(lineMouseDown)
+	.mouseup(lineMouseUp)
+	.mousemove(lineMouseMove);
 
   let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
   add_button.click(((inst, id) => {
@@ -447,8 +450,6 @@ function addLine(inst, from_load=null) {
     $('#grid-canvas').css({'width': $('#grid-canvas').attr('width'), 'height': ((line_no+1)*120) + 'px'})
   }
 
-//  drawPlayhead();
-
   return(line);
 }
 
@@ -537,6 +538,21 @@ function confirmDeleteLine() {
 */
   loadProject(JSON.stringify(arrange_data));  
   findNewTotalLength();
+}
+
+let selecting_started = false;
+function lineMouseDown(e){
+  selecting_started = true;
+  console.log(e.pageX)
+}
+function lineMouseMove(e){
+  if (selecting_started) {
+    console.log('slecting', e.pageX)
+  }
+}
+function lineMouseUp(e){
+  selecting_started = false;
+  console.log(e.pageX)
 }
 
 
@@ -1247,7 +1263,7 @@ function generateAddLineDropdown() {
 function zoomHorizontal(type) {
   let growth_factor = 1;
   if (type > 0) {
-    growth_factor = 6/4;
+    growth_factor = 8/6;
   }
   else {
     growth_factor = 3/4;

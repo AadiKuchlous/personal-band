@@ -50,4 +50,6 @@ function resizeHorizontal() {
   console.log(`repeat(20000, ${width} px)`)
   $('.inst-line').css({'grid-template-columns': `repeat(20000, ${width}px)`});
   drawGrid('grid-canvas', width);
+  console.log($('inst-line').length*120)
+  $('#grid-canvas').css({'height': ($('.inst-line').length*120) + 'px'})
 }
