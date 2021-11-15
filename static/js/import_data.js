@@ -52,4 +52,15 @@ function resizeHorizontal() {
   drawGrid('grid-canvas', width);
   console.log($('inst-line').length*120)
   $('#grid-canvas').css({'height': ($('.inst-line').length*120) + 'px'})
+
+  $('.inst-block').each(function() {
+      console.log($(this))
+      $(this).draggable({
+                'axis':'x',
+                'grid': [quarter_note_block_width/4],
+                'containment': '.inst-line',
+                stop: blockDragged,
+                'cursor': 'move'
+        })
+  })
 }

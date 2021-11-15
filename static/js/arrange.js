@@ -628,7 +628,7 @@ function blockDragged(event, ui) {
   let old_start = parseInt(this_block.css('grid-column-start'));
   let old_end = parseInt(this_block.css('grid-column-end'));
   let displacement = this_block.css('left');
-  let grid_displacement = parseInt(displacement)/(quarter_note_block_width/4);
+  let grid_displacement = Math.round(parseFloat(displacement)/(quarter_note_block_width/4));
   let grid_start = old_start + grid_displacement;
   let grid_end = old_end + grid_displacement;
   this_block.css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
