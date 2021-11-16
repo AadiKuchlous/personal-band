@@ -506,19 +506,24 @@ function transposeLine(increment){
     let sound_type = block.split('/')[0];
     let chord_suffix = '';
     if (sound_type == 'chords') {
-      chord_suffix = value.at(-1);
-      value = value.slice(0, -1);
+      if (value.at(-1) == 'm') {
+        chord_suffix = value.at(-1);
+        value = value.slice(0, -1);
+      }
     }
-    let octave = parseInt($(this).attr('octave'));
+    let old_octave = parseInt($(this).attr('octave'));
+    let octave = old_octave;
     let note_index = keys.notes.indexOf(value);
     let new_note_index = (note_index + increment);
     if (new_note_index < 0) {
-      new_note_index = keys.notes.length + new_note_index;
-      octave -= 1;
+      octave -= Math.floor((-1*new_note_index)/keys.notes.length) + 1;
+      new_note_index = keys.notes.length - (-1*new_note_index)%keys.notes.length;
+
+      console.log(note_index, old_octave, new_note_index, octave)
     }
     if (new_note_index >= keys.notes.length) { 
-      new_note_index = keys.notes.length % keys.notes.length;
-      octave += 1;
+      octave += Math.floor(new_note_index/keys.notes.length);
+      new_note_index = new_note_index%keys.notes.length;
     }
     let new_note = keys.notes[new_note_index];
     let new_sound = sound_type + '/' + new_note + chord_suffix;
@@ -526,7 +531,7 @@ function transposeLine(increment){
     block_obj.sound = new_sound;
     $(this).find('.block-label').text(new_note + chord_suffix);
     $(this).find('.block-octave-span').text(octave);
-    $(this).attr('sound', new_sound)
+    $(this).attr('sound', new_sound).attr('octave', octave)
   })
 }
 
@@ -557,7 +562,6 @@ function lineMouseDown(e){
   mouse_down = true;
   select_start_x = e.pageX;
   select_start_y = e.pageY;
-  console.log(select_start_x, select_start_y)
 }
 
 function lineMouseMove(e){
@@ -586,14 +590,12 @@ function lineMouseMove(e){
 
         if ((x_start >= selectX1 && x_start <= selectX2) || (x_end >= selectX1 && x_end <= selectX2) || (x_end >= selectX2 && x_start <= selectX1)) {
           if ((y_start >= selectY1 && y_start <= selectY2) || (y_end >= selectY1 && y_end <= selectY2) || (y_end >= selectY2 && y_start <= selectY1)) {
-            console.log(selectX1, selectX2)
             count +=1
             $(this).addClass('block-selected');
           }
         }
       }
     )
-    console.log('slecting', count)
   }
 }
 
@@ -607,7 +609,6 @@ function lineMouseUp(e){
     )
   }
   selecting_started = false;
-  console.log(selected_blocks);
 }
 
 
@@ -670,7 +671,6 @@ function paste() {
     line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
   }
 
-  console.log(playhead_grid);
 
   // Redraw the page with the updated data
   findNewTotalLength();
