@@ -103,6 +103,22 @@ function checkForFinalBuffer() {
   loaded_buffers += 1;
   if (loaded_buffers == total_buffers) {
     $('#playback-button-play').html(play_button_svg).on('click', play);
+    
+    $(document).keyup(function (e) {
+      code = e.which
+      if (code == 32) {
+        if (e.stopPropagation) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        if (playing) {
+          pause();
+        }
+        else {
+          play();
+        }
+      }
+    })
   }
   else {
     return
