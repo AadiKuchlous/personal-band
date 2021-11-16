@@ -85,7 +85,7 @@ $(document).ready(function(){
   $('#number-area').css({'height': '32px'});
   $('#number-canvas').attr('width', '50000px').attr('height', $('#number-area').height());
 //	.css({'top': $('#control-bar').height()})
-  $('#grid-canvas').attr('width', $('#number-canvas').attr('width'));
+  $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'height':'120px'}).attr('height', '120px');
 //  $('#studio-body').css({'top': $('#control-bar').height()});
   $('#playhead-canvas').attr('width', $('#number-canvas').height()/2)
 	.attr('height', '0px');
