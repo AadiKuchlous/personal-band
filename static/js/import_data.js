@@ -40,21 +40,23 @@ function loadProject(data_string) {
     }
   }
   $('#grid-canvas').css({'height': $('#arrange-area').children('.inst-line').length*120 + 'px'});
+
 }
 
 
+var width_index = 0;
 function resizeHorizontal() {
   let width = quarter_note_block_width/4;
+  $('#number-canvas').attr('width', `${Math.min(60000, quarter_note_block_width*4*200)}px`)
   console.log(width);
   drawNumbers('number-canvas', width);
-  console.log(`repeat(20000, ${width} px)`)
-  $('.inst-line').css({'grid-template-columns': `repeat(20000, ${width}px)`});
+  $('.inst-line').css({'grid-template-columns': `repeat(3200, ${width}px)`});
+  $('#grid-canvas').attr('width', $('#number-canvas').attr('width'))
   drawGrid('grid-canvas', width);
   console.log($('inst-line').length*120)
   $('#grid-canvas').css({'height': ($('.inst-line').length*120) + 'px'})
 
   $('.inst-block').each(function() {
-      console.log($(this))
       $(this).draggable({
                 'axis':'x',
                 'grid': [quarter_note_block_width/4],

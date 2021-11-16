@@ -1,8 +1,27 @@
 let grid_drawn = false;
 let playhead_start_pos = 0;
 
+
+function closest(l, needle) {
+  return l.reduce((a, b) => {
+    return Math.abs(b - needle) < Math.abs(a - needle) ? b : a;
+  })
+}
+
+
 function drawGrid(canvas_id, grid_width){
   let canvas = $('#' + canvas_id);
+
+  console.log(width_index)
+  if (width_index < 0) {
+    let width_options = [];
+    for (x = width_index; x < 0; x++) {
+      width_options.push(grid_width / Math.pow(2, x));
+    }
+    console.log(width_options)
+    grid_width = closest(width_options, 25)
+    console.log(grid_width)
+  }
 
   let height = canvas.height();
   let width = canvas.width();
@@ -11,6 +30,7 @@ function drawGrid(canvas_id, grid_width){
   context.clearRect(0, 0, width, height);
 
   for (var x = 0; x <= width; x += grid_width) {
+    
     let context = canvas[0].getContext('2d');
     context.beginPath();
     context.strokeStyle = 'lightgray';
@@ -39,7 +59,7 @@ function drawNumbers(canvas_id, grid_width){
   let context = canvas[0].getContext('2d');
   context.clearRect(0, 0, width, height);
 
-  for (var i = 0; i <= width / grid_width; i += 1) {
+  for (var i = 0; i <= 200*16; i += 1) {
     let x = i * grid_width;
     let context = canvas[0].getContext('2d');
     context.beginPath();
@@ -116,14 +136,17 @@ function drawPlayhead() {
   ctx.closePath();
 }
 
-
+var old_playhead_pos = 0;
 function updatePlayheadPos() {
   let cur_time = globalcontext.currentTime;
   let current_play_position = cur_time-play_start_time;
   if (current_play_position <= fullBuffer.duration - playhead_position * eighthNoteTime && playing) {
     let playhead = $('#playhead-canvas');
-    let new_pos = (playhead_position * quarter_note_block_width/2) + playhead_start_pos + (cur_time / eighthNoteTime) * quarter_note_block_width/2;
-    playhead.css({'left': new_pos}); 
+    let new_pos = (playhead_position * quarter_note_block_width/2) + playhead_start_pos + (current_play_position / eighthNoteTime) * quarter_note_block_width/2;
+    playhead.css({'left': new_pos});
+    old_playhead_pos = new_pos;
+    if (new_pos >= 0.5*window.innerWidth) {
+    }
     window.requestAnimationFrame(updatePlayheadPos);
   }
   else {

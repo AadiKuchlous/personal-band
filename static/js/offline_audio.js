@@ -13,7 +13,9 @@ var total_lines = 0;
 var waiting_for_download;
 var play_start_time = 0;
 var fullBuffer = null;
+var previous_arrange_data;
 var stop_timeout;
+var prev_time_test = 0;
 
 function newGlobalContext() {
   eighthNoteTime = (60 / tempo) / 2;
@@ -45,30 +47,29 @@ function pause() {
 
 
 function play () {
-  eighthNoteTime = (60 / tempo) / 2;
-  total_lines = 0;
+//  console.log(performance.now());
+//  prev_time_test = performance.now();
+
   playing = true;
   newGlobalContext();
   let cur_time = globalcontext.currentTime;
-  loadSequence(cur_time);
-  let length = (seq_length - (playhead_position * eighthNoteTime))*1000;
-  console.log(length+100)
-  stop_timeout = setTimeout(() => {playing = false; clearTimeout(stop_timeout)}, length+100);
 
-/*
-  loopInterval = setInterval(
-    () => {
-      playSequence(globalcontext.currentTime);
-    }, seq_length
-  );
-  setTimeout(
-    () => {
-      clearInterval(loopInterval);
-      loopInterval = null;
-      playing = false;
-    }, seq_length*3
-  );
-*/
+  if (previous_arrange_data !== JSON.stringify(arrange_data)) {
+    eighthNoteTime = (60 / tempo) / 2;
+    total_lines = 0;
+    newGlobalContext();
+    loadSequence(cur_time);
+    previous_arrange_data = JSON.stringify(arrange_data);
+  }
+  else {
+    let total_length = (parseFloat(arrange_data.length) - playhead_position)*eighthNoteTime*1000
+    play_start_time = cur_time;
+    updatePlayheadPos();
+    playSound(fullBuffer, cur_time, cur_time + total_length, 1);
+  }
+
+  let length = (seq_length - (playhead_position * eighthNoteTime))*1000;
+  stop_timeout = setTimeout(() => {playing = false; clearTimeout(stop_timeout)}, length+100);
 }
 
 
@@ -85,12 +86,12 @@ function loadSequence(start_time) {
       }
     }
   }
-
-  return (seq_length);
 }
 
 
 function load_line(line, index, volume, seq_start_time){
+
+//  console.log("Load Line Start " + performance.now());
 
   if (line['length'] > 0) {
     let lineCtx = new OfflineAudioContext({
@@ -126,9 +127,12 @@ function load_line(line, index, volume, seq_start_time){
     }
 
     lineCtx.startRendering().then(function(renderedBuffer) {
+//      console.log("Loaded Line Buffer " + performance.now());
       buffer = renderedBuffer;
       addToGlobal(buffer, line, line_start_time, index, seq_start_time);
     });
+
+//    console.log("Load Line End " + performance.now());
 
     return (end_time - seq_start_time);
   }
@@ -146,7 +150,12 @@ function addToGlobal(buffer, line, start_time, index, seq_start_time) {
   line_buffers[line['pos']] = buffer;
 
   lines_loaded += 1;
+
+//  console.log("Loaded line " + lines_loaded + ' ' + (performance.now()));
+  prev_time_test = performance.now();
+
   if (lines_loaded == total_lines){
+//    console.log(performance.now())
     playFull(seq_start_time);
     lines_loaded = 0;
   }
@@ -155,22 +164,18 @@ function addToGlobal(buffer, line, start_time, index, seq_start_time) {
 
 function playFull(seq_start_time){
   globalOfflineContext.startRendering().then(function(renderedBuffer) {
+//    console.log('playing full: ' + performance.now())
     fullBuffer = renderedBuffer;
     let length = seq_length * 100;
     play_start_time = seq_start_time;
-    updatePlayheadPos(fullBuffer);
+    play_start_time = globalcontext.currentTime;
+//    updatePlayheadPos(fullBuffer);
+    updatePlayheadPos();
     playSound(fullBuffer, seq_start_time, seq_start_time+length, 1);
     if (waiting_for_download) {
       serveDownload(renderedBuffer);
     }
 
-/*
-    globalOfflineContext = new OfflineAudioContext({
-      numberOfChannels: 2,
-      length: 44100 * 100,
-      sampleRate: 44100
-    });
-*/
   });
 }
 
@@ -201,7 +206,7 @@ function playSound(buffer, time, end_time, volume) {
   let fade_out_curve = [volume, volume*0.3, 0]
   gainNode.gain.setValueCurveAtTime(fade_out_curve, end_time, 0.1);
 
-  source.start(time, playhead_position * eighthNoteTime);
+  source.start(globalcontext.currentTime, playhead_position * eighthNoteTime);
   source.stop(end_time+0.1);
 }
 
@@ -228,7 +233,7 @@ $(document).ready(function(){
     }
   });
 
-
+/*
   $(this).keyup(function (e) {
     code = e.which
     if (code == 32) {
@@ -244,7 +249,7 @@ $(document).ready(function(){
       }
     }
   })
-
+*/
 
   $('#tempo-input').hide()
   $('#tempo-span').click(function(){
