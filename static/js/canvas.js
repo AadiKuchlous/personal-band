@@ -1,5 +1,6 @@
 let grid_drawn = false;
 let playhead_start_pos = 0;
+let grid_lines_width = 25;
 
 
 function closest(l, needle) {
@@ -22,6 +23,8 @@ function drawGrid(canvas_id, grid_width){
     grid_width = closest(width_options, 25)
     console.log(grid_width)
   }
+
+  grid_lines_width = grid_width;
 
   let height = canvas.height();
   let width = canvas.width();
@@ -51,6 +54,7 @@ function drawGrid(canvas_id, grid_width){
 
 
 function drawNumbers(canvas_id, grid_width){
+  console.log("drawing numbers")
   let canvas = $('#' + canvas_id);
 
   let height = canvas.height();
@@ -66,6 +70,11 @@ function drawNumbers(canvas_id, grid_width){
     context.strokeStyle = 'lightgray';
     context.lineWidth = 1;
     context.font = '15px serif';
+
+    if (x % grid_lines_width !== 0) {
+      continue
+    }
+
     if (i % 16 == 0 || i == 0) {
       context.strokeStyle = '#999999';
       context.moveTo(x, 0);
