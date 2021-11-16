@@ -1008,7 +1008,7 @@ function loadNoteModal(block) {
       else {
         octave_span.text('2');
       }
-      $('#noteModal').attr('octave', octave_span.text());
+      container.attr('octave', octave_span.text());
 
       let minus_div = $('<div/>').addClass('note-selector-octave-change-div')
 	.html('<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="tempo-change-path" fill="#ffffff" style="fill: rgb(255, 255, 255);"><path d="M21.5,78.83333v14.33333h129v-14.33333z"></path></g></g></svg>')
@@ -1017,11 +1017,11 @@ function loadNoteModal(block) {
           let min = parseInt(inst_data[block.attr('inst')]['range-' + $(e.target).parents('.tab-pane').attr('id').split('-')[1]].split('-')[0]);
 	  if (new_oct >= min) {
 	    octave_span.text(new_oct);
-	    $('#noteModal').attr('octave', new_oct);
+	    $(e.target).parents('.tab-pane').attr('octave', new_oct);
             $('#noteModal').find('.note-button').each(
               function() {
                 $(this).css({'border-color': '#767676'});
-                if (block.attr('octave') == $('#noteModal').attr('octave')) {
+                if (block.attr('octave') == $(this).parents('.tab-pane').attr('octave')) {
                   if (block.attr('sound') == $(this).attr('value')) {
                     $(this).css({'border-color': 'blue'});
                   }
@@ -1037,11 +1037,11 @@ function loadNoteModal(block) {
           let max = parseInt(inst_data[block.attr('inst')]['range-' + $(e.target).parents('.tab-pane').attr('id').split('-')[1]].split('-')[1]);
 	  if (new_oct <= max) {
 	    octave_span.text(new_oct);
-	    $('#noteModal').attr('octave', new_oct);
+	    $(e.target).parents('.tab-pane').attr('octave', new_oct);
             $('#noteModal').find('.note-button').each(
               function() {
                 $(this).css({'border-color': '#767676'});
-                if (block.attr('octave') == $('#noteModal').attr('octave')) {
+                if (block.attr('octave') == $(this).parents('.tab-pane').attr('octave')) {
                   if (block.attr('sound') == $(this).attr('value')) {
                     $(this).css({'border-color': 'blue'});
                   }
@@ -1146,9 +1146,9 @@ function loadNoteModal(block) {
                 block.append($('<div/>').text($(this).attr("value").split('/').at(-1).split('-')[0]).addClass('block-label'));
                 let block_obj = arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]
                 block_obj.sound = $(this).attr("value");
-                block_obj.octave = $('#noteModal').attr('octave');
-                block.attr('octave', $('#noteModal').attr('octave'));
-                block.find('.block-octave-span').text($('#noteModal').attr('octave'));
+                block_obj.octave = $(this).parents('.tab-pane').attr('octave');
+                block.attr('octave', $(this).parents('.tab-pane').attr('octave'));
+                block.find('.block-octave-span').text($(this).parents('.tab-pane').attr('octave'));
 
                 if (inst_data[block.attr('inst')].type == 'melodic') {
                   block.find('.block-octave-span').show()
@@ -1181,7 +1181,7 @@ function loadNoteModal(block) {
         (() => {
           return(
             function() {
-              let sound = $(this).parent().attr('value') + '-' + $('#noteModal').attr('octave'); 
+              let sound = $(this).parent().attr('value') + '-' + $(this).parents('.tab-pane').attr('octave'); 
               levels = sound.split('/');
               let instrument_tree = bufferlist[modal_body.attr('inst')];
               let buffer = instrument_tree;
