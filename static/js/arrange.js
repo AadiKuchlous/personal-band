@@ -532,6 +532,17 @@ function transposeLine(increment){
     $(this).find('.block-label').text(new_note + chord_suffix);
     $(this).find('.block-octave-span').text(octave);
     $(this).attr('sound', new_sound).attr('octave', octave)
+
+    let oct_range = inst_data[$(this).attr('inst')][`range-${sound_type}`].split('-');
+    let min_oct = parseInt(oct_range[0]);
+    let max_oct = parseInt(oct_range[1]);
+
+    if (octave > max_oct || octave < min_oct) {
+      $(this).addClass('block-disabled');
+    }
+    else {
+      $(this).removeClass('block-disabled');
+    }
   })
 }
 
@@ -1140,6 +1151,8 @@ function loadNoteModal(block) {
                 $(this).css({'border-color': 'blue'});
                 let old_value = $(this).attr('value');
 //                $(this).attr('value', old_value);
+
+                block.removeClass('block-disabled');
 
                 block.attr("sound", $(this).attr("value"));
                 block.find('.block-label').remove()

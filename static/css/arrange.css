@@ -57,6 +57,10 @@ body {
   border: 2px solid rgb(208, 208, 208);
 }
 
+.inst-block.block-disabled {
+  background-color: #ababab !important;
+}
+
 .inst-line {
   display: grid;
   grid-template-columns: repeat(20000, 25px);
