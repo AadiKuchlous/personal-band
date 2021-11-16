@@ -616,10 +616,65 @@ function copy() {
 }
 
 function paste() {
+  let playhead_grid = Math.round(playhead_position * 2) + 1;
+  
+  // Organise all of the selected blocks into a
+  // dictionary of arrays, one key-pair for each line
+  let blocks = {};
   for (i = 0; i < clipboard.length; i++) {
-    let item = clipboard[i];
-    console.log(item);
+    let block = clipboard[i];
+    let inst_line = block.parents('.inst-line');
+    let line_id = inst_line.attr('id');
+    if (!(line_id in blocks)) {
+      blocks[line_id] = [];
+    }
+    blocks[line_id].push(block);
   }
+
+  // Update arrange_data
+
+  for (line_id in blocks) {
+    let line_index = parseInt($(`#${line_id}`).attr('position'));
+    let line_obj = arrange_data.lines[line_index];
+    let line_blocks = blocks[line_id];
+    line_blocks.sort((a, b) => parseInt($(a).css('grid-column-start')) - parseInt($(b).css('grid-column-start')));
+    let line_grid_start = $(line_blocks[0]).css('grid-column-start');
+
+    for (i = 0; i < line_blocks.length; i++) {
+      let block = $(line_blocks[i]);
+      let old_grid_start = parseInt(block.css('grid-column-start'));
+      let old_grid_end = parseInt(block.css('grid-column-end'));
+      let length = block.attr('length');
+      let octave = block.attr('octave');
+      let sound = block.attr('sound');
+
+      let new_grid_start = (old_grid_start - line_grid_start) + playhead_grid;
+      let new_grid_end = (old_grid_end - old_grid_start) + new_grid_start;
+
+      let block_obj = {
+          'grid-end': new_grid_end,
+          'grid-start': new_grid_start,
+          'length': length,
+          'name': '',
+          'sound': sound
+      }
+
+      if (octave) {
+        block_obj.octave = octave;
+      }
+
+      line_obj.blocks.push(block_obj);
+
+    }
+
+    line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
+  }
+
+  console.log(playhead_grid);
+
+  // Redraw the page with the updated data
+  findNewTotalLength();
+  loadProject(JSON.stringify(arrange_data));
 }
 
 
