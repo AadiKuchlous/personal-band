@@ -51,7 +51,7 @@ function resizeHorizontal() {
   console.log(width);
   drawNumbers('number-canvas', width);
   $('.inst-line').css({'grid-template-columns': `repeat(3200, ${width}px)`});
-  $('#grid-canvas').attr('width', $('#number-canvas').attr('width'))
+  $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'width': $('#number-canvas').attr('width')})
   drawGrid('grid-canvas', width);
   console.log($('inst-line').length*120)
   $('#grid-canvas').css({'height': ($('.inst-line').length*120) + 'px'})
