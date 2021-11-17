@@ -111,7 +111,7 @@ $(document).ready(function(){
 
   $('.tempo').hover( function (){
 	  $('#tempo-label').css({'display': 'flex'})
-	}, 
+	},
 	function (){
 	  $('#tempo-label').css({'display': 'none'})
 	}
@@ -162,9 +162,9 @@ $(document).ready(function(){
           $('.inst-line, .inst-block').off('mouseenter mouseleave')
         },
         drag: function(event, ui) {
-	  if (ui.position.left < parseFloat(playhead_start_pos)) {
-	    ui.position.left = parseFloat(playhead_start_pos);
-	  }
+          if (ui.position.left < parseFloat(playhead_start_pos)) {
+            ui.position.left = parseFloat(playhead_start_pos);
+          }
 	},
 	stop: playheadDragged,
 	'cursor': 'move'
@@ -255,19 +255,21 @@ function generateDropdownItems(items, block) {
             block.css(
               {
                 'grid-column-start': grid_start,
-                'grid-column-end': grid_end,
-                'width': 'auto'
+                // 'grid-column-end': grid_end,
+                'width': `${new_length*quarter_note_block_width}px`
               }
             );
+            block.attr('length', new_length);
             block_obj['grid-start'] = grid_start;
             block_obj['grid-end'] = grid_end;
-            block_obj['length'] = new_length
+            block_obj['length'] = new_length;
 
             let i = parseInt(block.attr('position'));
             if (i+1 == line.children('.inst-block').length) {
               let line_obj = arrange_data['lines'][line_index];
               line_obj['grid-end'] = grid_end;
               line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
+              block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${grid_end}`});
               findNewTotalLength();
             }
 
@@ -281,8 +283,8 @@ function generateDropdownItems(items, block) {
               cur_block.css(
                 {
                   'grid-column-start': grid_start,
-                  'grid-column-end': grid_end,
-                  'width': 'auto'
+                  // 'grid-column-end': grid_end,
+                  'width': `${(grid_end-grid_start)*quarter_note_block_width/4}px`
                 }
               );
               cur_block_obj['grid-start'] = grid_start;
@@ -291,6 +293,7 @@ function generateDropdownItems(items, block) {
               if (i+1 == line.children('.inst-block').length) {
                 let line_obj = arrange_data['lines'][line_index];
                 line_obj['grid-end'] = grid_end;
+                block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${grid_end}`});
                 line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
                 findNewTotalLength();
               }
@@ -356,6 +359,11 @@ function addLine(inst, from_load=null) {
     }
   })(inst,id))
   line.append(add_button);
+
+  if (from_load) {
+    add_button.css({'grid-column-start': `${from_load['grid-end']}`});
+  }
+
   line.hover(instLineHover, instLineHoverOut);
 
   arrange_area.append(line);
@@ -625,11 +633,16 @@ function lineMouseUp(e){
 
 
 function copy() {
-  clipboard = selected_blocks;
+  clipboard = [];
+  $('.block-selected').each(function(){
+    clipboard.push($(this));
+    console.log($(this).attr('length'))
+  })
 }
 
 function paste() {
   let playhead_grid = Math.round(playhead_position * 2) + 1;
+  let copy_buffer_grid_start = playhead_grid;
   
   // Organise all of the selected blocks into a
   // dictionary of arrays, one key-pair for each line
@@ -642,6 +655,9 @@ function paste() {
       blocks[line_id] = [];
     }
     blocks[line_id].push(block);
+
+    let block_grid_start = parseInt(block.css('grid-column-start'));
+    copy_buffer_grid_start = Math.min(block_grid_start, copy_buffer_grid_start);
   }
 
   // Update arrange_data
@@ -655,13 +671,15 @@ function paste() {
 
     for (i = 0; i < line_blocks.length; i++) {
       let block = $(line_blocks[i]);
-      let old_grid_start = parseInt(block.css('grid-column-start'));
-      let old_grid_end = parseInt(block.css('grid-column-end'));
+      let old_block_index = parseInt(block.attr('position'));
+      let old_block_obj = line_obj.blocks[old_block_index];
+      let old_grid_start = parseInt(old_block_obj['grid-start']);
+      let old_grid_end = parseInt(old_block_obj['grid-end']);
       let length = block.attr('length');
       let octave = block.attr('octave');
       let sound = block.attr('sound');
 
-      let new_grid_start = (old_grid_start - line_grid_start) + playhead_grid;
+      let new_grid_start = (old_grid_start - copy_buffer_grid_start) + playhead_grid;
       let new_grid_end = (old_grid_end - old_grid_start) + new_grid_start;
 
       let block_obj = {
@@ -678,6 +696,8 @@ function paste() {
 
       line_obj.blocks.push(block_obj);
 
+      line_obj['grid-end'] = Math.max(line_obj['grid-end'], new_grid_end);
+      line_obj['length'] += length * 2;
     }
 
     line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
@@ -687,33 +707,38 @@ function paste() {
   // Redraw the page with the updated data
   findNewTotalLength();
   loadProject(JSON.stringify(arrange_data));
+  selected_blocks = [];
 }
 
 
 function blockDragged(event, ui) {
   dragging_started = false;
+
   for (block_index in selected_blocks) {
     let this_block = selected_blocks[block_index];
-    let old_start = parseInt(this_block.css('grid-column-start'));
-    let old_end = parseInt(this_block.css('grid-column-end'));
+    let line_pos = parseInt(this_block.parent().attr('position'));
+    let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt(this_block.attr('position'))];
+    let old_start = parseInt(block_obj['grid-start']);
+    let old_end = parseInt(block_obj['grid-end']);
     let displacement = this_block.css('left');
     let grid_displacement = Math.round(parseFloat(displacement)/(quarter_note_block_width/4));
     let grid_start = old_start + grid_displacement;
     let grid_end = old_end + grid_displacement;
 
-    this_block.css({'grid-column-start': grid_start, 'grid-column-end': grid_end, 'left': '0px'});
-    let line_pos = parseInt(this_block.parent().attr('position'));
-    let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt(this_block.attr('position'))];
+    this_block.css({'grid-column-start': grid_start, 'left': '0px'});
     block_obj['grid-start'] = grid_start;
     block_obj['grid-end'] = grid_end;
 
-    console.log(`old ${old_start} ${old_end}, new ${block_obj['grid-start']} ${block_obj['grid-end']}, from ${grid_displacement}`)
+    // console.log(`old ${old_start} ${old_end}, new ${block_obj['grid-start']} ${block_obj['grid-end']}, from ${grid_displacement}`)
     let line_div = this_block.parent();
     let line_obj = arrange_data['lines'][parseInt(line_div.attr('position'))];
+    
+
     if (grid_end > line_obj['grid-end']) {
       line_obj['grid-end'] = parseInt(grid_end);
       line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
     }
+
     if (old_end == line_obj['grid-end'] && grid_end < line_obj['grid-end']) {
       let line_end = 0;
       line_div.find('.inst-block').each(
@@ -726,18 +751,31 @@ function blockDragged(event, ui) {
       );
       line_obj['grid-end'] = line_end;
       line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-    }	
-    console.log(line_obj)
-    line_obj['blocks'].sort((a, b) => {parseInt(a['grid-start']) - parseInt(b['grid-start'])});
+    }
+
+    // console.log(line_obj)
+  }
+
+  for (i = 0; i < arrange_data.lines.length; i++) {
+    let line_obj = arrange_data.lines[i];
+    line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
     console.log(line_obj)
   }
+
   findNewTotalLength();
   loadProject(JSON.stringify(arrange_data));
+  selected_blocks = [];
 }
 
 
 function blockDragging(event, ui) {
   dragging_started = true;
+  let this_block = $(event.target)
+/*
+  if (!(this_block in selected_blocks)) {
+    selected_blocks.push(this_block)
+  }
+*/
   let displacement = ui.position.left;
   for (block_index in selected_blocks) {
     let block = selected_blocks[block_index];
@@ -747,6 +785,7 @@ function blockDragging(event, ui) {
 
 
 var dragging_started = false;
+var block_clicked;
 
 function addblock(inst, id, from_load) {
   let arrange_area = $("#arrange-area");
@@ -785,30 +824,25 @@ function addblock(inst, id, from_load) {
 
   let grid_start = 1;
   let grid_end = 5;
-  if (index == 0) {
-    if (from_load) {
-      grid_start = block_data_obj['grid-start'];
-      grid_end = grid_start + 4 * block_data_obj['length'];
-    }
-    block.css({
-        'grid-column-start': grid_start,
-        'grid-column-end': grid_end
-    });
+  let width = parseInt(block.attr('length'));
+
+  if (from_load) {
+    grid_start = block_data_obj['grid-start'];
   }
+
   else {
     let line_length = line_obj['blocks'].length;
-    grid_start = line_obj['blocks'][line_length-1]['grid-end'];
-    grid_end = grid_start + 4;
-    if (from_load) {
-      grid_start = block_data_obj['grid-start'];
-      grid_end = grid_start + 4 * block_data_obj['length'];
+    if (index > 0) {
+      grid_start = line_obj['blocks'][line_length-1]['grid-end'];
     }
-    let grid_column = grid_start + '/' + grid_end;
-    block.css({
-        'grid-column-start': grid_start,
-	'grid-column-end': grid_end
-    });
   }
+  grid_end = grid_start + 4;
+  
+  block.css({
+    'grid-column-start': grid_start,
+    'width': `${width * quarter_note_block_width}px`
+  });
+
   block_obj['grid-start'] = grid_start;
   block_obj['grid-end'] = grid_end;
 
@@ -818,26 +852,54 @@ function addblock(inst, id, from_load) {
     if (line_obj['length'] > arrange_data['length']) {
       arrange_data['length'] = line_obj['length'];
     }
+
   }
 
   block.on('mouseup', function(e) {
-    if (selecting_started || dragging_started) {
+    if (selecting_started || dragging_started) { 
       return
     }
 
-    if ($(this).hasClass('block-selected') && selected_blocks.length == 1) {
-      $(this).removeClass('block-selected');
+    if ($(this).hasClass('block-selected')) {
+      $('.inst-block').removeClass('block-selected');
       selected_blocks = [];
     }
+
     else {
-      if (!($(e.target).hasClass('block-octave-span'))) {
-        $(this).addClass('block-selected');
-        $('.inst-block').not(this).removeClass('block-selected');
-        selected_blocks = [$(this)];
-      }
+      $('.inst-block').removeClass('block-selected'); 
+      selected_blocks = [];
+      $(this).addClass('block-selected')
+      selected_blocks.push($(this));
     }
-    $(this).find('.block-del').css({'display': 'flex'});
   });
+
+
+/*
+  block.on('mousedown', function(e) {
+    $('.inst-block').removeClass('block-selected');
+    selected_blocks = [];
+    block_clicked = null;
+    if (!($(this).hasClass('block-selected'))) {
+      $(this).addClass('block-selected');
+      block_clicked = $(this)[0];
+      selected_blocks.push($(this));
+    }
+  })
+
+  block.on('mouseup', function(e) {    
+    if (block_clicked == $(this)[0]) {
+      block_clicked = null;
+      return
+    }
+    if (selecting_started) {
+      return
+    }
+    if ($(this).hasClass('block-selected')) {
+      selected_blocks = [];
+    }
+    $('.inst-block').removeClass('block-selected');
+  })
+*/
 
   block.dblclick(function() {
     loadNoteModal($(this))
@@ -942,6 +1004,8 @@ function addblock(inst, id, from_load) {
   block.append(chord_symbol);
 
   inst_line.append(block);
+
+  block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
 
   if (!from_load) {
     block = $('#' + block_id)

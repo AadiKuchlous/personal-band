@@ -13,15 +13,12 @@ function closest(l, needle) {
 function drawGrid(canvas_id, grid_width){
   let canvas = $('#' + canvas_id);
 
-  console.log(width_index)
   if (width_index < 0) {
     let width_options = [];
     for (x = width_index; x < 0; x++) {
       width_options.push(grid_width / Math.pow(2, x));
     }
-    console.log(width_options)
     grid_width = closest(width_options, 25)
-    console.log(grid_width)
   }
 
   grid_lines_width = grid_width;
@@ -54,7 +51,6 @@ function drawGrid(canvas_id, grid_width){
 
 
 function drawNumbers(canvas_id, grid_width){
-  console.log("drawing numbers")
   let canvas = $('#' + canvas_id);
 
   let height = canvas.height();

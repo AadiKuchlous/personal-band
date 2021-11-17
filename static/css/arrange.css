@@ -51,10 +51,12 @@ body {
   align-items: center;
   flex-direction: column;
   justify-content: center;
+  z-index: 98;
 }
 
 .block-selected{
   border: 2px solid rgb(208, 208, 208);
+  z-index: 99;
 }
 
 .inst-block.block-disabled {
