@@ -824,7 +824,7 @@ function addblock(inst, id, from_load) {
 
   let grid_start = 1;
   let grid_end = 5;
-  let width = parseInt(block.attr('length'));
+  let width = parseFloat(block.attr('length'));
 
   if (from_load) {
     grid_start = block_data_obj['grid-start'];
