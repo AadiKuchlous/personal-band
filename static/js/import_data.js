@@ -40,7 +40,14 @@ function loadProject(data_string) {
       }
     }
   }
-  $('#grid-canvas').css({'height': $('#arrange-area').children('.inst-line').length*120 + 'px'});
+  let grid_canvas_height = Math.max(120, arrange_data.lines.length*120);
+  if (arrange_data.lines.length == 0) {
+    $('#grid-canvas').css({'display': 'none'});
+  }
+  else {
+    $('#grid-canvas').css({'display': 'block'});
+  }
+  $('#grid-canvas').css({'height': `${grid_canvas_height}px`});
 
 }
 

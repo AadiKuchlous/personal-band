@@ -60,30 +60,42 @@ function drawNumbers(canvas_id, grid_width){
   context.clearRect(0, 0, width, height);
 
   for (var i = 0; i <= 200*16; i += 1) {
-    let x = i * grid_width;
+    let x = i * grid_lines_width;
     let context = canvas[0].getContext('2d');
     context.beginPath();
     context.strokeStyle = 'lightgray';
     context.lineWidth = 1;
     context.font = '15px serif';
 
-    if (x % grid_lines_width !== 0) {
+
+    if (width_index >= 0 && Math.abs(x - grid_lines_width*i) >= 0.001) {
       continue
     }
+/*
+    if (x %grid_lines_width) {
+      console.log(i, x)
+    }
 
-    if (i % 16 == 0 || i == 0) {
+    if (width_index < 0 && (x % grid_lines_width !== 0)) {
+      continue
+    }
+*/
+  
+    let grid_no = x / grid_width
+
+    if ((grid_no) % 16 == 0 || i == 0) {
       context.strokeStyle = '#999999';
       context.moveTo(x, 0);
       context.lineTo(x, height);
       context.fillStyle = theme_obj['text-color'];
-      context.fillText(Math.round((i / 16 + 1)).toString(), x + 3, height-5);
+      context.fillText(Math.round((grid_no / 16 + 1)).toString(), x + 3, height-5);
     }
-    else if (i % 8 == 0) {
+    else if ((grid_no) % 8 == 0) {
       context.strokeStyle = '#bbbbbb';
       context.moveTo(x, height/2);
       context.lineTo(x, height);
     }
-    else if (i % 4 == 0) {
+    else if ((grid_no) % 4 == 0) {
       context.strokeStyle = '#bbbbbb';
       context.moveTo(x, height*2/3);
       context.lineTo(x, height);

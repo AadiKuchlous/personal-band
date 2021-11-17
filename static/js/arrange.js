@@ -267,9 +267,8 @@ function generateDropdownItems(items, block) {
             let i = parseInt(block.attr('position'));
             if (i+1 == line.children('.inst-block').length) {
               let line_obj = arrange_data['lines'][line_index];
-              line_obj['grid-end'] = grid_end;
-              line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-              block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${grid_end}`});
+              calculateLineLength(line_obj);
+              block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
               findNewTotalLength();
             }
 
@@ -292,9 +291,10 @@ function generateDropdownItems(items, block) {
 
               if (i+1 == line.children('.inst-block').length) {
                 let line_obj = arrange_data['lines'][line_index];
-                line_obj['grid-end'] = grid_end;
-                block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${grid_end}`});
-                line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
+                // line_obj['grid-end'] = grid_end;
+                // line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
+                calculateLineLength(line_obj);
+                block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
                 findNewTotalLength();
               }
             }
@@ -683,9 +683,9 @@ function paste() {
       let new_grid_end = (old_grid_end - old_grid_start) + new_grid_start;
 
       let block_obj = {
-          'grid-end': new_grid_end,
-          'grid-start': new_grid_start,
-          'length': length,
+          'grid-end': parseInt(new_grid_end),
+          'grid-start': parseInt(new_grid_start),
+          'length': parseFloat(length),
           'name': '',
           'sound': sound
       }
@@ -696,8 +696,9 @@ function paste() {
 
       line_obj.blocks.push(block_obj);
 
-      line_obj['grid-end'] = Math.max(line_obj['grid-end'], new_grid_end);
-      line_obj['length'] += length * 2;
+      // line_obj['grid-end'] = Math.max(line_obj['grid-end'], new_grid_end);
+      // line_obj['length'] += length * 2;
+      calculateLineLength(line_obj);
     }
 
     line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
@@ -733,27 +734,7 @@ function blockDragged(event, ui) {
     let line_div = this_block.parent();
     let line_obj = arrange_data['lines'][parseInt(line_div.attr('position'))];
     
-
-    if (grid_end > line_obj['grid-end']) {
-      line_obj['grid-end'] = parseInt(grid_end);
-      line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-    }
-
-    if (old_end == line_obj['grid-end'] && grid_end < line_obj['grid-end']) {
-      let line_end = 0;
-      line_div.find('.inst-block').each(
-        (i, block) => {
-          let block_end = parseInt($(block).css('grid-column-end'));
-          if (block_end > line_end) {
-            line_end = block_end;
-          }
-        }
-      );
-      line_obj['grid-end'] = line_end;
-      line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-    }
-
-    // console.log(line_obj)
+    calculateLineLength(line_obj);
   }
 
   for (i = 0; i < arrange_data.lines.length; i++) {
@@ -771,11 +752,6 @@ function blockDragged(event, ui) {
 function blockDragging(event, ui) {
   dragging_started = true;
   let this_block = $(event.target)
-/*
-  if (!(this_block in selected_blocks)) {
-    selected_blocks.push(this_block)
-  }
-*/
   let displacement = ui.position.left;
   for (block_index in selected_blocks) {
     let block = selected_blocks[block_index];
@@ -846,14 +822,7 @@ function addblock(inst, id, from_load) {
   block_obj['grid-start'] = grid_start;
   block_obj['grid-end'] = grid_end;
 
-  if (grid_end > line_obj['grid-end']) {
-    line_obj['grid-end'] = grid_end;
-    line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
-    if (line_obj['length'] > arrange_data['length']) {
-      arrange_data['length'] = line_obj['length'];
-    }
-
-  }
+  calculateLineLength(line_obj);
 
   block.on('mouseup', function(e) {
     if (selecting_started || dragging_started) { 
@@ -1027,6 +996,8 @@ function addblock(inst, id, from_load) {
     $('#noteModal').modal('show');
   
     line_obj["blocks"].push(block_obj);
+
+    findNewTotalLength();
   }
 }
 
@@ -1312,15 +1283,15 @@ function deleteBlock(block) {
   let old_line_length = line_data['length'];
   if (block_index == blocks.length) {
     line_data['length'] = line_data['length'] - (parseInt(block.attr('length')) * 2)
+    
     if (block_index == 0) {
       line_data['grid-end'] = 1;
     }
     else {
       line_data['grid-end'] = blocks[block_index-1]['grid-end'];
     }
-    findNewTotalLength();
   }
-//  for (i = block_index; i < blocks.length; i++) {}
+  findNewTotalLength();
   loadProject(JSON.stringify(arrange_data));
 }
 
@@ -1493,4 +1464,18 @@ function zoomHorizontal(type) {
   quarter_note_block_width = growth_factor*quarter_note_block_width;
 
   resizeHorizontal();
+}
+
+
+function calculateLineLength(line_obj) {
+  let blocks = line_obj.blocks;
+  let grid_end = 1;
+  for (index in blocks) {
+    block = blocks[index];
+    if (block['grid-end'] > grid_end) {
+      grid_end = block['grid-end'];
+    }
+  }
+  line_obj['grid-end'] = grid_end;
+  line_obj['length'] = (grid_end - 1) / 2;
 }
