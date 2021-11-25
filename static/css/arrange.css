@@ -18,6 +18,7 @@ body {
   justify-content: center;
   cursor: pointer;
   user-select: none;
+  position: absolute;
 }
 
 .add-block:hover {
@@ -45,7 +46,10 @@ body {
   height: 100px;
   width: auto;
   display: flex;
+/*
   position: relative;
+*/
+  position: absolute;
   border-radius: 10px;
   cursor: grab;
   align-items: center;
@@ -64,8 +68,12 @@ body {
 }
 
 .inst-line {
+/*
   display: grid;
   grid-template-columns: repeat(20000, 25px);
+*/
+  display: flex;
+  flex-direction: row;
   align-items: center;
   height: 120px;
   border-bottom: 1px solid rgb(0 0 255 / 25%);
@@ -190,8 +198,10 @@ body {
 }
 
 #number-canvas {
-//  height: 20px;
-//  position: sticky;
+/*
+  height: 20px;
+  position: sticky;
+*/
   visibility: none;
 }
 
@@ -348,7 +358,9 @@ button.nav-link {
 }
 
 .note-selector-octave-div {
-//  background: black;
+/*
+  background: black;
+*/
   height: fit-content;
   margin-top: 10px;
   margin-bottom: 5px;

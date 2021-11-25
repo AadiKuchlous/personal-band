@@ -255,6 +255,7 @@ function generateDropdownItems(items, block) {
             block.css(
               {
                 'grid-column-start': grid_start,
+                'left': `${(grid_start-1) * quarter_note_block_width / 4}px`,
                 // 'grid-column-end': grid_end,
                 'width': `${new_length*quarter_note_block_width}px`
               }
@@ -268,7 +269,7 @@ function generateDropdownItems(items, block) {
             if (i+1 == line.children('.inst-block').length) {
               let line_obj = arrange_data['lines'][line_index];
               calculateLineLength(line_obj);
-              block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
+              // block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
               findNewTotalLength();
             }
 
@@ -282,6 +283,7 @@ function generateDropdownItems(items, block) {
               cur_block.css(
                 {
                   'grid-column-start': grid_start,
+                  'left': `${(grid_start-1) * quarter_note_block_width / 4}px`,
                   // 'grid-column-end': grid_end,
                   'width': `${(grid_end-grid_start)*quarter_note_block_width/4}px`
                 }
@@ -294,7 +296,7 @@ function generateDropdownItems(items, block) {
                 // line_obj['grid-end'] = grid_end;
                 // line_obj['length'] = (line_obj['grid-end'] - line_obj['grid-start']) / 2;
                 calculateLineLength(line_obj);
-                block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
+                // block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
                 findNewTotalLength();
               }
             }
@@ -350,7 +352,7 @@ function addLine(inst, from_load=null) {
 	.mouseup(lineMouseUp)
 	.mousemove(lineMouseMove);
   let grid_width = quarter_note_block_width/4;
-  line.css({'grid-template-columns': `repeat(20000, ${grid_width}px)`});
+  // line.css({'grid-template-columns': `repeat(20000, ${grid_width}px)`});
 
   let add_button = $('<div/>').addClass('add-block').append($('<img/>').attr('src', 'https://img.icons8.com/ios-glyphs/30/000000/plus-math.png'))
   add_button.click(((inst, id) => {
@@ -361,7 +363,10 @@ function addLine(inst, from_load=null) {
   line.append(add_button);
 
   if (from_load) {
-    add_button.css({'grid-column-start': `${from_load['grid-end']}`});
+    add_button.css({
+      'grid-column-start': `${from_load['grid-end']}`,
+      'left': `${(from_load['grid-end']-1) * quarter_note_block_width / 4}px`
+    });
   }
 
   line.hover(instLineHover, instLineHoverOut);
@@ -636,7 +641,7 @@ function copy() {
   clipboard = [];
   $('.block-selected').each(function(){
     clipboard.push($(this));
-    console.log($(this).attr('length'))
+    // console.log($(this).attr('length'))
   })
 }
 
@@ -721,14 +726,14 @@ function blockDragged(event, ui) {
     let block_obj = arrange_data['lines'][line_pos]['blocks'][parseInt(this_block.attr('position'))];
     let old_start = parseInt(block_obj['grid-start']);
     let old_end = parseInt(block_obj['grid-end']);
-    let displacement = this_block.css('left');
+    let displacement = parseFloat(this_block.css('left')) - ((old_start - 1) * quarter_note_block_width/4);
     let grid_displacement = Math.round(parseFloat(displacement)/(quarter_note_block_width/4));
     let grid_start = old_start + grid_displacement;
     let grid_end = old_end + grid_displacement;
 
-    this_block.css({'grid-column-start': grid_start, 'left': '0px'});
-    block_obj['grid-start'] = grid_start;
-    block_obj['grid-end'] = grid_end;
+    // this_block.css({'grid-column-start': grid_start, 'left': '0px'});
+    // block_obj['grid-start'] = grid_start;
+    // block_obj['grid-end'] = grid_end;
 
     // console.log(`old ${old_start} ${old_end}, new ${block_obj['grid-start']} ${block_obj['grid-end']}, from ${grid_displacement}`)
     let line_div = this_block.parent();
@@ -740,7 +745,7 @@ function blockDragged(event, ui) {
   for (i = 0; i < arrange_data.lines.length; i++) {
     let line_obj = arrange_data.lines[i];
     line_obj['blocks'].sort((a, b) => parseInt(a['grid-start']) - parseInt(b['grid-start']));
-    console.log(line_obj)
+    // console.log(line_obj)
   }
 
   findNewTotalLength();
@@ -752,10 +757,31 @@ function blockDragged(event, ui) {
 function blockDragging(event, ui) {
   dragging_started = true;
   let this_block = $(event.target)
-  let displacement = ui.position.left;
-  for (block_index in selected_blocks) {
-    let block = selected_blocks[block_index];
-    block.css({'left': `${displacement}px`})
+
+  let this_block_pos = parseInt(this_block.attr('position'));
+  let this_line_pos = parseInt(this_block.parents('.inst-line').attr('position'));
+  let this_block_obj = arrange_data.lines[this_line_pos].blocks[this_block_pos];
+  let this_old_pos = (this_block_obj['grid-start'] - 1) * quarter_note_block_width / 4;
+
+  let displacement = ui.position.left - this_old_pos;
+
+  if ((displacement % (quarter_note_block_width/4) == 0) && (this_old_pos !== parseFloat(this_block.css('left')))) {
+    console.log(this_old_pos, this_block.css('left'))
+    for (block_index in selected_blocks) {
+      let block = selected_blocks[block_index];
+      let block_pos = parseInt(block.attr('position'));
+      let line_pos = parseInt(block.parents('.inst-line').attr('position'));
+      let block_obj = arrange_data.lines[line_pos].blocks[block_pos];
+      let old_pos = (block_obj['grid-start'] - 1) * quarter_note_block_width / 4;
+
+      block.css({'left': `${parseFloat(block.css('left')) + displacement}px`});
+
+      let grid_displacement = displacement / (quarter_note_block_width / 4);
+
+      block_obj['grid-start'] += grid_displacement;
+      block_obj['grid-end'] += grid_displacement;
+    }
+  // this_block_obj['grid-start'] = this_block_obj['grid-start'] + displacement / (quarter_note_block_width / 4);
   }
 }
 
@@ -786,6 +812,7 @@ function addblock(inst, id, from_load) {
 		stop: blockDragged,
 		'cursor': 'move'
 	})
+	.css({'position': 'absolute'});
 
   let line_obj = arrange_data['lines'][line_index];
   let block_data_obj = line_obj['blocks'][index];
@@ -816,14 +843,14 @@ function addblock(inst, id, from_load) {
   
   block.css({
     'grid-column-start': grid_start,
+    'left': `${(grid_start-1) * quarter_note_block_width / 4}px`,
     'width': `${width * quarter_note_block_width}px`
   });
 
   block_obj['grid-start'] = grid_start;
   block_obj['grid-end'] = grid_end;
 
-  calculateLineLength(line_obj);
-
+  // Click Functionality
   block.on('mouseup', function(e) {
     if (selecting_started || dragging_started) { 
       return
@@ -974,8 +1001,6 @@ function addblock(inst, id, from_load) {
 
   inst_line.append(block);
 
-  block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`});
-
   if (!from_load) {
     block = $('#' + block_id)
 
@@ -996,6 +1021,10 @@ function addblock(inst, id, from_load) {
     $('#noteModal').modal('show');
   
     line_obj["blocks"].push(block_obj);
+
+    calculateLineLength(line_obj);
+
+    block.parents('.inst-line').find('.add-block').css({'grid-column-start': `${line_obj['grid-end']}`, 'left': `${(line_obj['grid-end']-1) * quarter_note_block_width / 4}px`});
 
     findNewTotalLength();
   }

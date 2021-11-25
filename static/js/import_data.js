@@ -29,7 +29,7 @@ function loadProject(data_string) {
       let line_id = inst+'-'+(pos).toString();
       let line_cont = addLine(inst, line_data);
 
-      console.log(line_data['grid-end'])
+      // console.log(line_data['grid-end'])
       // line_cont.find('.add-block')
 
       //Add the blocks
@@ -56,7 +56,7 @@ var width_index = 0;
 function resizeHorizontal() {
   let width = quarter_note_block_width/4;
   $('#number-canvas').attr('width', `${Math.min(60000, quarter_note_block_width*4*200)}px`)
-  $('.inst-line').css({'grid-template-columns': `repeat(3200, ${width}px)`});
+  // $('.inst-line').css({'grid-template-columns': `repeat(3200, ${width}px)`});
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'width': $('#number-canvas').attr('width')})
   drawGrid('grid-canvas', width);
   drawNumbers('number-canvas', width);
