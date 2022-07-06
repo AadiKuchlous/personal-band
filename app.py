@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 import os
 from pathlib import Path
 
@@ -13,3 +13,8 @@ app.config['TESTING'] = True
 def hello():
 #  paths = Path(dir) / 'static' / 'audio_files'
   return render_template("main.html")
+
+@app.route("/spongebob")
+def sb():
+#  paths = Path(dir) / 'static' / 'audio_files'
+  return send_from_directory(".", "spongebob/index.html")
