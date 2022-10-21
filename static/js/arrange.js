@@ -36,11 +36,13 @@ $(document).ready(function(){
   $(this).keydown(function(e) {
     if (e.which == delKey && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       e.preventDefault();
-      let selected_block = selected_blocks[0];
-      let line_pos = parseInt(selected_block.parent('.inst-line').attr('position'));
-      let block_pos = parseInt(selected_block.attr('position'));
-      arrange_data['lines'][line_pos]['blocks'].splice(block_pos, 1);
-      selected_block.remove();
+      while (selected_blocks.length > 0) {
+        let selected_block = selected_blocks[0];
+        deleteBlock(selected_block, false);
+        selected_blocks.shift();
+      }
+      selected_blocks = [];
+      loadProject(JSON.stringify(arrange_data));
     }
 
     // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
@@ -254,12 +256,13 @@ function generateDropdownItems(items, block) {
             let grid_start = block_obj['grid-start'];
             block.css(
               {
-                'grid-column-start': grid_start,
+                // 'grid-column-start': grid_start,
                 'left': `${(grid_start-1) * quarter_note_block_width / 4}px`,
                 // 'grid-column-end': grid_end,
                 'width': `${new_length*quarter_note_block_width}px`
               }
             );
+            block.attr('grid-column-start', grid_start);
             block.attr('length', new_length);
             block_obj['grid-start'] = grid_start;
             block_obj['grid-end'] = grid_end;
@@ -1303,14 +1306,14 @@ function loadNoteModal(block) {
   )
 }
 
-function deleteBlock(block) {
+function deleteBlock(block, single=true) {
   let line_index = parseInt(block.parents('.inst-line').attr('position'));
   let block_index = parseInt(block.attr('position'));
   let line_data = arrange_data['lines'][line_index];
   let blocks = line_data['blocks'];
-  blocks.splice(block_index, 1);
+  blocks[block_index]['to_delete'] = true;
   let old_line_length = line_data['length'];
-  if (block_index == blocks.length) {
+  if (block_index == blocks.length-1) {
     line_data['length'] = line_data['length'] - (parseInt(block.attr('length')) * 2)
     
     if (block_index == 0) {
@@ -1320,8 +1323,30 @@ function deleteBlock(block) {
       line_data['grid-end'] = blocks[block_index-1]['grid-end'];
     }
   }
+
+  updateLengths();
+
+  if (single) {
+    loadProject(JSON.stringify(arrange_data));
+  }
+}
+
+function updateLengths() {
+  let lines = arrange_data['lines'];
+  for (i = 0; i < lines.length; i++) {
+    line_data = lines[i];
+    grid_end = line_data['grid-start'];
+    blocks = line_data['blocks'];
+    if (blocks.length !== 0) {
+      grid_end = blocks[blocks.length-1]['grid-end'];
+    }
+    length = (grid_end-1)/2;
+
+   line_data['grid-end'] = grid_end;
+   line_data['length'] = length;
+  }
+
   findNewTotalLength();
-  loadProject(JSON.stringify(arrange_data));
 }
 
 function findNewTotalLength() {

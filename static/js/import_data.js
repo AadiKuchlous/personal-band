@@ -34,9 +34,16 @@ function loadProject(data_string) {
 
       //Add the blocks
       let blocks = line_data['blocks'];
-      for (j = 0; j < blocks.length; j++) {
+      let j = 0;
+      while (j < blocks.length) {
         let block = blocks[j];
-        addblock(inst, line_id, true);
+        if (!block.to_delete) {
+          addblock(inst, line_id, true);
+          j += 1;
+        }
+        else {
+          blocks.splice(j, 1);
+        }
       }
     }
   }
@@ -73,5 +80,8 @@ function resizeHorizontal() {
     })
     let width = parseInt($(this).attr('length'))
     $(this).css({'width': `${width * quarter_note_block_width}px`})
+    let grid_start = parseFloat($(this).attr('grid-column-start'));
+    let left = grid_start * quarter_note_block_width / 2;
+    $(this).css({'left': `${left}px`});
   })
 }
