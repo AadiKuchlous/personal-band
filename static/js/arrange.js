@@ -768,7 +768,7 @@ function blockDragging(event, ui) {
 
   let displacement = ui.position.left - this_old_pos;
 
-  if ((displacement % (quarter_note_block_width/4) == 0) && (this_old_pos !== parseFloat(this_block.css('left')))) {
+  if (Math.abs(displacement % (quarter_note_block_width/4) < 15) && (this_old_pos !== parseFloat(this_block.css('left')))) {
     console.log(this_old_pos, this_block.css('left'))
     for (block_index in selected_blocks) {
       let block = selected_blocks[block_index];
