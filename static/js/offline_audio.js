@@ -66,6 +66,9 @@ function play () {
     play_start_time = cur_time;
     updatePlayheadPos();
     playSound(fullBuffer, cur_time, cur_time + total_length, 1);
+    if (waiting_for_download) {
+      serveDownload(fullBuffer);
+    }
   }
 
   let length = (seq_length - (playhead_position * eighthNoteTime))*1000;
