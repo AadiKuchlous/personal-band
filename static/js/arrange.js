@@ -42,7 +42,7 @@ $(document).ready(function(){
         selected_blocks.shift();
       }
       selected_blocks = [];
-      loadProject(JSON.stringify(arrange_data));
+      loadProject(JSON.stringify(arrange_data), true);
     }
 
     // Moving the playhead with arrow Keys. Holding Shift moves 1 bar at a time.
@@ -94,7 +94,7 @@ $(document).ready(function(){
 
   $('#arrange-area').css({'top': $('#number-area').height()+$('#control-bar').height()});
 
-  $('#load-project').click((() => {loadProject(sample_project)}));
+  $('#load-project').click((() => {loadProject(sample_project, true)}));
 
   $('.tempo-change').on("click", (e) => {
     let clicked = $(e.currentTarget);
@@ -573,7 +573,7 @@ function confirmDeleteLine() {
   let index = parseInt($('#'+line_to_edit).attr('position'));
   arrange_data['lines'].splice(index, 1);
 
-  loadProject(JSON.stringify(arrange_data));  
+  loadProject(JSON.stringify(arrange_data), true);  
   findNewTotalLength();
 }
 
@@ -715,7 +715,7 @@ function paste() {
 
   // Redraw the page with the updated data
   findNewTotalLength();
-  loadProject(JSON.stringify(arrange_data));
+  loadProject(JSON.stringify(arrange_data, true));
   selected_blocks = [];
 }
 
@@ -752,7 +752,7 @@ function blockDragged(event, ui) {
   }
 
   findNewTotalLength();
-  loadProject(JSON.stringify(arrange_data));
+  loadProject(JSON.stringify(arrange_data, false));
   selected_blocks = [];
 }
 
@@ -1327,7 +1327,7 @@ function deleteBlock(block, single=true) {
   updateLengths();
 
   if (single) {
-    loadProject(JSON.stringify(arrange_data));
+    loadProject(JSON.stringify(arrange_data, false));
   }
 }
 

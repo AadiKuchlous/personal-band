@@ -1,4 +1,4 @@
-function loadProject(data_string) {
+function loadProject(data_string, lines_changed) {
   // Parse the json string
   let load_arrange_data = JSON.parse(data_string);
   arrange_data = load_arrange_data;
@@ -11,11 +11,20 @@ function loadProject(data_string) {
   $('.track-header').remove();
   $('#arrange-area').children().remove('.inst-line');
 
+  let grid_canvas_height = Math.max(120, arrange_data.lines.length*120);
+  if (arrange_data.lines.length == 0) {
+    $('#grid-canvas').css({'display': 'none'});
+  }
+  else {
+    $('#grid-canvas').css({'display': 'block'});
+  }
+  $('#grid-canvas').css({'height': `${grid_canvas_height}px`});
+
   if (arrange_data['lines'].length > 0) {
 
-    if (!grid_drawn) {
+    if (lines_changed) {
       //Draw the grid
-      $('#grid-canvas').attr('height', '120px');
+      // $('#grid-canvas').attr('height', '120px');
       drawGrid('grid-canvas', quarter_note_block_width/4);
     }
 
@@ -47,14 +56,6 @@ function loadProject(data_string) {
       }
     }
   }
-  let grid_canvas_height = Math.max(120, arrange_data.lines.length*120);
-  if (arrange_data.lines.length == 0) {
-    $('#grid-canvas').css({'display': 'none'});
-  }
-  else {
-    $('#grid-canvas').css({'display': 'block'});
-  }
-  $('#grid-canvas').css({'height': `${grid_canvas_height}px`});
 
 }
 
@@ -80,8 +81,18 @@ function resizeHorizontal() {
     })
     let width = parseInt($(this).attr('length'))
     $(this).css({'width': `${width * quarter_note_block_width}px`})
-    let grid_start = parseFloat($(this).attr('grid-column-start'));
-    let left = grid_start * quarter_note_block_width / 2;
+    let grid_start = parseFloat($(this).css('grid-column-start'));
+    let left = (grid_start - 1) * quarter_note_block_width / 4;
+    console.log(quarter_note_block_width);
+    console.log($(this).css('grid-column-start'));
+    $(this).css({'left': `${left}px`});
+  })
+
+  $('.add-block').each(function() {
+    let grid_start = parseFloat($(this).css('grid-column-start'));
+    let left = (grid_start - 1) * quarter_note_block_width / 4;
+    console.log(quarter_note_block_width);
+    console.log($(this).css('grid-column-start'));
     $(this).css({'left': `${left}px`});
   })
 }
