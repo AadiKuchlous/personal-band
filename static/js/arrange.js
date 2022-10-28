@@ -33,6 +33,7 @@ var delKey = 8,
 
 $(document).ready(function(){
   loadAllBuffers();
+
   $(this).keydown(function(e) {
     if (e.which == delKey && !($(':focus').hasClass('block-octave-change') || $(':focus').hasClass('tempo-input'))) {
       e.preventDefault();
@@ -193,6 +194,8 @@ $(document).ready(function(){
       window.scrollTo({'top': '32'})
     }
   })
+
+  loadProject(sample_project, true)
 
 })
 
@@ -650,7 +653,7 @@ function copy() {
 
 function paste() {
   let playhead_grid = Math.round(playhead_position * 2) + 1;
-  let copy_buffer_grid_start = playhead_grid;
+  let copy_buffer_grid_start = 1000000;
   
   // Organise all of the selected blocks into a
   // dictionary of arrays, one key-pair for each line
@@ -665,6 +668,7 @@ function paste() {
     blocks[line_id].push(block);
 
     let block_grid_start = parseInt(block.css('grid-column-start'));
+    console.log(block_grid_start);
     copy_buffer_grid_start = Math.min(block_grid_start, copy_buffer_grid_start);
   }
 
@@ -688,6 +692,7 @@ function paste() {
       let sound = block.attr('sound');
 
       let new_grid_start = (old_grid_start - copy_buffer_grid_start) + playhead_grid;
+      console.log(old_grid_start, copy_buffer_grid_start, playhead_grid);
       let new_grid_end = (old_grid_end - old_grid_start) + new_grid_start;
 
       let block_obj = {

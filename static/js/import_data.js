@@ -79,12 +79,13 @@ function resizeHorizontal() {
         stop: blockDragged,
         'cursor': 'move'
     })
-    let width = parseInt($(this).attr('length'))
+    let width = parseFloat($(this).attr('length'))
+    console.log(width);
     $(this).css({'width': `${width * quarter_note_block_width}px`})
     let grid_start = parseFloat($(this).css('grid-column-start'));
     let left = (grid_start - 1) * quarter_note_block_width / 4;
-    console.log(quarter_note_block_width);
-    console.log($(this).css('grid-column-start'));
+    // console.log(quarter_note_block_width);
+    // console.log($(this).css('grid-column-start'));
     $(this).css({'left': `${left}px`});
   })
 
