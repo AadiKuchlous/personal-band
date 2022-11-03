@@ -19,7 +19,7 @@ var themes = {
   "dark": {
     'control-bar-background': '#21003a',
     'studio-background': 'black',
-    'block-box-shadow': '0px 0px 20px',
+    'block-box-shadow': '0px 0px 10px',
     'text-color': 'white',
     'track-text-color': '#c9c9c9',
     'block-blue': '#38b6ff',

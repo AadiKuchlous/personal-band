@@ -57,6 +57,8 @@ function loadProject(data_string, lines_changed) {
     }
   }
 
+  changeTheme();
+
 }
 
 
