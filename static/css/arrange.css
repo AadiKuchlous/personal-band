@@ -291,7 +291,7 @@ input[type=number]::-webkit-inner-spin-button {
 #download-wav {
   position: absolute;
   right: 0px;
-  margin-right: 160px;
+  margin-right: 15vw;
   display: inline-flex;
 }
 
