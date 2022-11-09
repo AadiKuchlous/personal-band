@@ -1,4 +1,7 @@
 let arrange_data = {'lines':[], 'length':0, 'tempo':120};
+
+const empty = JSON.stringify(arrange_data);
+
 let block_length_options = ['1/16', '1/8', '1/4', '1/2', '1']
 let selected_blocks = [];
 let clipboard = [];
@@ -1537,4 +1540,10 @@ function calculateLineLength(line_obj) {
   }
   line_obj['grid-end'] = grid_end;
   line_obj['length'] = (grid_end - 1) / 2;
+}
+
+
+function clearPage() {
+  loadProject(empty, true);
+
 }
