@@ -48,8 +48,7 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
 }
 
 BufferLoader.prototype.load = function() {
-  for (var i = 0; i < this.urlList.length; ++i)
-  this.loadBuffer(this.urlList[i], i);
+  this.loadBuffer(this.urlList[0], 0);
 }
 
 var bufferlist = null;
