@@ -1,6 +1,6 @@
 // loaded buffers will only catch up to total buffers
-// in the end because total buffers in inremented
-// intintaneously
+// in the end because total buffers in incremented
+// instantaneously
 let total_buffers = 0;
 let loaded_buffers = 0;
 
