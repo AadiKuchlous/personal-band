@@ -65,7 +65,7 @@ function loadProject(data_string, lines_changed) {
 var width_index = 0;
 function resizeHorizontal() {
   let width = quarter_note_block_width/4;
-  $('#number-canvas').attr('width', `${Math.min(60000, quarter_note_block_width*4*200)}px`)
+  $('#number-canvas').attr('width', `${Math.min(30000, quarter_note_block_width*4*200)}px`)
   // $('.inst-line').css({'grid-template-columns': `repeat(3200, ${width}px)`});
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'width': $('#number-canvas').attr('width')})
   drawGrid('grid-canvas', width);

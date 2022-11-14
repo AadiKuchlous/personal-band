@@ -89,7 +89,7 @@ $(document).ready(function(){
   $(document).bind('copy', copy).bind('paste', paste);
 
   $('#number-area').css({'height': '32px'});
-  $('#number-canvas').attr('width', `${Math.min(60000, quarter_note_block_width*4*200)}px`).attr('height', $('#number-area').height());
+  $('#number-canvas').attr('width', `${Math.min(30000, quarter_note_block_width*4*200)}px`).attr('height', $('#number-area').height());
 //	.css({'top': $('#control-bar').height()})
   $('#grid-canvas').attr('width', $('#number-canvas').attr('width')).css({'height':'120px'}).attr('height', '120px');
 //  $('#studio-body').css({'top': $('#control-bar').height()});
@@ -524,12 +524,13 @@ function transposeLine(increment){
     let block_index = parseInt($(this).attr('position'));
     let block_obj = arrange_data.lines[line_index].blocks[block_index];
     let block = $(this).attr('sound');
-    let value = block.split('/').at(-1);
+    let block_split = block.split('/');
+    let value = block_split[block_split.length-1];
     let sound_type = block.split('/')[0];
     let chord_suffix = '';
     if (sound_type == 'chords') {
-      if (value.at(-1) == 'm') {
-        chord_suffix = value.at(-1);
+      if (value[value.length-1] == 'm') {
+        chord_suffix = value[value.length-1];
         value = value.slice(0, -1);
       }
     }
@@ -992,18 +993,18 @@ function addblock(inst, id, from_load) {
   let chord_symbol = $('<img/>').attr('src', 'https://img.icons8.com/fluency-systems-filled/20/000000/layers.png').addClass('block-chord-symbol');
 
   if (from_load) {
-    let sound = line_obj['blocks'][index]['sound'];
+    let sound = line_obj['blocks'][index]['sound'].split('/');
     block.attr('sound', sound);
-    block.append($('<div/>').addClass('block-label').text(sound.split('/').at(-1).split('-')[0]))
+    block.append($('<div/>').addClass('block-label').text(sound[sound.length-1].split('-')[0]))
     block.attr('title', sound)
 
-    if (sound !== '') {
+    if (sound !== ['']) {
       if (inst_data[inst].type == 'melodic') {
         octave_span.css({'display': 'block'});
       }
     }
    
-    if (sound.split('/')[0] == 'chords') { 
+    if (sound[0] == 'chords') { 
       chord_symbol.css({'display': 'block'});
     }
   }
@@ -1256,7 +1257,8 @@ function loadNoteModal(block) {
 
                 block.attr("sound", $(this).attr("value"));
                 block.find('.block-label').remove()
-                block.append($('<div/>').text($(this).attr("value").split('/').at(-1).split('-')[0]).addClass('block-label'));
+                let val = sound.split('/');
+                block.append($('<div/>').text(val[val.length-1].split('-')[0]).addClass('block-label'));
                 let block_obj = arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]
                 block_obj.sound = $(this).attr("value");
                 block_obj.octave = $(this).parents('.tab-pane').attr('octave');
