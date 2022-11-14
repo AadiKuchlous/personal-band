@@ -1,6 +1,6 @@
 body {
   background-color: #000000;
-  overflow-y: hidden;
+  // overflow-y: hidden;
   -ms-touch-action: none;
   touch-action: none;
 }
