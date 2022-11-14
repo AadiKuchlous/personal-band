@@ -35,20 +35,12 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
 
   request.onload = function() {
     // Asynchronously decode the audio file data in request.response
-    loader.context.decodeAudioData(
-      request.response,
-      afterDecodeAudioData(loader, index),
-      function(error) {
-        console.warn('decodeAudioData error', error);
+
+    loader.context.decodeAudioData(request.response).then(afterDecodeAudioData(loader, index)).catch(
+      function () {
         browserNotSupported();
-        loader.context.decodeAudioData(request.response).then(afterDecodeAudioData(loader, index)).catch(
-          function () {
-            browserNotSupported();
-            console.log("Promise Rejected")
-          } 
-        );
-        return;
-      }
+        console.log("Promise Rejected")
+      } 
     );
   }
 
