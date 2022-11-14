@@ -34,6 +34,15 @@ var delKey = 8,
     vKey = 86
 
 
+function browserNotSupported() {
+  $('body').html('');
+  setTimeout(() => {
+    alert('This browser is not currently supported by EsayDAW\nPlease use a recent version of Chrome, Brave or Firefox');
+  }, 300)}
+
+
+window.addEventListener("error", browserNotSupported);
+
 $(document).ready(function(){
   loadAllBuffers();
 

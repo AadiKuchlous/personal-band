@@ -13,6 +13,18 @@ function BufferLoader(context, urlList, callback) {
   this.loadCount = 0;
 }
 
+function afterDecodeAudioData(loader, index) {
+  return (buffer) => {
+    if (!buffer) {
+      alert('error decoding file data: ' + url);
+      return;
+    }
+    loader.bufferList[index] = buffer;
+    if (++loader.loadCount == loader.urlList.length)
+      loader.onload(loader.bufferList);
+  }
+}
+
 BufferLoader.prototype.loadBuffer = function(url, index) {
   // Load buffer asynchronously
   var request = new XMLHttpRequest();
@@ -25,17 +37,17 @@ BufferLoader.prototype.loadBuffer = function(url, index) {
     // Asynchronously decode the audio file data in request.response
     loader.context.decodeAudioData(
       request.response,
-      function(buffer) {
-        if (!buffer) {
-          alert('error decoding file data: ' + url);
-          return;
-        }
-        loader.bufferList[index] = buffer;
-        if (++loader.loadCount == loader.urlList.length)
-          loader.onload(loader.bufferList);
-      },
+      afterDecodeAudioData(loader, index),
       function(error) {
-        console.error('decodeAudioData error', error);
+        console.warn('decodeAudioData error', error);
+        browserNotSupported();
+        loader.context.decodeAudioData(request.response).then(afterDecodeAudioData(loader, index)).catch(
+          function () {
+            browserNotSupported();
+            console.log("Promise Rejected")
+          } 
+        );
+        return;
       }
     );
   }
