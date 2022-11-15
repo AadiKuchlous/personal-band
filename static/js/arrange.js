@@ -209,6 +209,9 @@ $(document).ready(function(){
 
   loadProject(sample_project, true)
 
+  zoomHorizontal(-1);
+  zoomHorizontal(-1);
+
 })
 
 
