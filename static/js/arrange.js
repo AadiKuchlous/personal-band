@@ -1521,7 +1521,8 @@ function generateAddLineDropdown() {
     let button = $('<button/>');
     button.addClass('dropdown-item')
 	.bind("click", function() {
-	  addLine(inst)
+	  addLine(inst);
+          drawGrid('grid-canvas', quarter_note_block_width/4);
 	})
 	.html(capitalize(inst));
     $('#add-inst-dropdown-menu').append(button);

@@ -13,6 +13,8 @@ function closest(l, needle) {
 function drawGrid(canvas_id, grid_width){
   let canvas = $('#' + canvas_id);
 
+  canvas.css("display", "block");
+
   if (width_index < 0) {
     let width_options = [];
     for (x = width_index; x < 0; x++) {
