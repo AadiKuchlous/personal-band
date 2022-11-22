@@ -495,6 +495,8 @@ function addLine(inst, from_load=null) {
     $('#grid-canvas').css({'width': $('#grid-canvas').attr('width'), 'height': ((line_no+1)*120) + 'px'})
   }
 
+  // loadProject(JSON.stringify(arrange_data), true);
+
   return(line);
 }
 
@@ -1269,7 +1271,7 @@ function loadNoteModal(block) {
 
                 block.attr("sound", $(this).attr("value"));
                 block.find('.block-label').remove()
-                let val = sound.split('/');
+                let val = $(this).attr("value").split('/');
                 block.append($('<div/>').text(val[val.length-1].split('-')[0]).addClass('block-label'));
                 let block_obj = arrange_data['lines'][line_index]["blocks"][parseInt(block.attr('position'))]
                 block_obj.sound = $(this).attr("value");
