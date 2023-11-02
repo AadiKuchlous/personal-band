@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EasyDAW</title>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.js" crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js" integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.11/lib/draggable.bundle.js"></script>
+
+<link rel="stylesheet" href="./static/css/arrange.css">
+
+<script src="./static/js/svg.js"></script>
+<script src="./static/js/buffer_to_wav.js"></script>
+<script src="./static/js/sample_list.js"></script>
+<script src="./static/js/load_buffers.js"></script>
+<script src="./static/js/projects.js"></script>
+<script src="./static/js/themes.js"></script>
+<script src="./static/js/offline_audio.js"></script>
+<script src="./static/js/canvas.js"></script>
+<script src="./static/js/arrange.js"></script>
+<script src="./static/js/import_data.js"></script>
+<script src="./static/js/visualise.js"></script>
+
+<link rel="icon" 
+      type="image/png" 
+      href="./static/garage-band.png">
+</head>
+<body>
+
+<div id="block"></div>
+
+<div id="studio-body">
+
+<div id="control-bar">
+  <div id="SettingsButton">
+    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 172 172" style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#cccccc"><path d="M75.18001,14.33333c-3.43283,0 -6.36736,2.42659 -7.02669,5.79492l-2.39355,12.28971c-5.8821,2.22427 -11.32102,5.33176 -16.097,9.25228l-11.78581,-4.05924c-3.2465,-1.118 -6.81841,0.22441 -8.53841,3.19141l-10.80599,18.72852c-1.71283,2.97417 -1.08945,6.74999 1.49772,9.00033l9.44824,8.21647c-0.49137,3.0197 -0.81185,6.09382 -0.81185,9.25228c0,3.15846 0.32048,6.23258 0.81185,9.25228l-9.44824,8.21647c-2.58717,2.25033 -3.21055,6.02616 -1.49772,9.00032l10.80599,18.72852c1.71283,2.97417 5.29191,4.31623 8.53841,3.2054l11.78581,-4.05924c4.77441,3.91806 10.21756,7.01501 16.097,9.23828l2.39355,12.28972c0.65933,3.36833 3.59386,5.79492 7.02669,5.79492h21.63998c3.43283,0 6.36735,-2.42659 7.02669,-5.79492l2.39356,-12.28972c5.88211,-2.22427 11.32102,-5.33176 16.097,-9.25227l11.78581,4.05924c3.2465,1.118 6.81841,-0.21724 8.53841,-3.1914l10.80599,-18.74252c1.71284,-2.97417 1.08945,-6.73599 -1.49772,-8.98633l-9.44824,-8.21647c0.49137,-3.0197 0.81185,-6.09382 0.81185,-9.25228c0,-3.15846 -0.32048,-6.23258 -0.81185,-9.25228l9.44824,-8.21647c2.58717,-2.25033 3.21056,-6.02616 1.49772,-9.00033l-10.80599,-18.72852c-1.71283,-2.97417 -5.29191,-4.31624 -8.53841,-3.2054l-11.78581,4.05924c-4.7744,-3.91806 -10.21755,-7.01501 -16.097,-9.23828l-2.39356,-12.28971c-0.65933,-3.36833 -3.59385,-5.79492 -7.02669,-5.79492zM86,57.33333c15.83117,0 28.66667,12.8355 28.66667,28.66667c0,15.83117 -12.8355,28.66667 -28.66667,28.66667c-15.83117,0 -28.66667,-12.8355 -28.66667,-28.66667c0,-15.83117 12.8355,-28.66667 28.66667,-28.66667z"></path></g></g></svg>
+  </div>
+
+  <button class="btn btn-primary" id="clear-screen" onclick="clearPage()">Clear Page</button>
+
+  <div class="playback-button" onclick="stopSound()" id="playback-button-stop">
+    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+      width="35" height="35"
+      viewBox="0 0 172 172" class="playback-button-svg"
+      style=" fill:#000000;"><g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g fill="#000000"><path d="M121.83333,136.16667h-71.66667c-7.91917,0 -14.33333,-6.41417 -14.33333,-14.33333v-71.66667c0,-7.91917 6.41417,-14.33333 14.33333,-14.33333h71.66667c7.91917,0 14.33333,6.41417 14.33333,14.33333v71.66667c0,7.91917 -6.41417,14.33333 -14.33333,14.33333z"></path></g></g></g>
+    </svg>
+  </div>
+
+  <div class="playback-button" id="playback-button-play">
+    <img style="width:80%; border-radius:50%;" src="static/loading.gif"></img>
+  </div>
+
+  <div class="heading-and-button tempo" title="Edit tempo" style="user-select: none; touch-action: pan-y; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); display:flex; align-items: center; justify-centent: center; margin-left: 25px;">
+    <div class="tempo-change" value="minus">
+      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+        width="18" height="18"
+        viewBox="0 0 172 172"
+        style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="tempo-change-path" fill="#ffffff"><path d="M21.5,78.83333v14.33333h129v-14.33333z"></path></g></g></svg>
+    </div>
+
+    <span id="tempo-span">120</span>
+    <input id="tempo-input" type="number" value="">
+
+    <div class="tempo-change" value="plus">
+      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+        width="18" height="18"
+        viewBox="0 0 172 172"
+        style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="tempo-change-path" fill="#ffffff"><path d="M78.83333,21.5v57.33333h-57.33333v14.33333h57.33333v57.33333h14.33333v-57.33333h57.33333v-14.33333h-57.33333v-57.33333z"></path></g></g></svg>
+    </div>
+
+    <span id="tempo-label">Tempo</span>
+  </div>
+
+
+  <div class="dropdown key-change" id="key-note-change" style="margin-left: 25px">
+    <div id="keyNoteChangeButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="user-select: none">
+	C
+    </div>
+
+    <div class="dropdown-menu" id="key-note-options" aria-labelledby="dropdownMenuButton" style="z-index:101;">
+    </div>
+  </div>
+
+  <div class="dropdown key-change" id="key-type-change" style="margin-left: 3px">
+    <div id="keyTypeChangeButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style='user-select: none'>
+	Major
+    </div>
+
+    <div class="dropdown-menu" id="key-type-options" aria-labelledby="dropdownMenuButton" style="z-index:101;">
+    </div>
+  </div>
+
+
+  <div id="download-wav">
+    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+      width="36" height="36"
+      viewBox="0 0 172 172"
+      style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g id="download-svg-path" fill="#ffffff"><path d="M143.78125,139.75v-26.875c0,-2.28437 -1.74687,-4.03125 -4.03125,-4.03125c-2.28438,0 -4.03125,1.74688 -4.03125,4.03125v22.84375h-99.4375v-22.84375c0,-2.28437 -1.74688,-4.03125 -4.03125,-4.03125c-2.28438,0 -4.03125,1.74688 -4.03125,4.03125v26.875c0,2.28438 1.74687,4.03125 4.03125,4.03125h107.5c2.28438,0 4.03125,-1.74687 4.03125,-4.03125zM86,28.21875c-2.28437,0 -4.03125,1.74687 -4.03125,4.03125v57.5125l-13.30312,-13.30313c-1.6125,-1.6125 -4.16563,-1.6125 -5.64375,0c-1.6125,1.6125 -1.6125,4.16563 0,5.64375l20.15625,20.15625c0.80625,0.80625 1.88125,1.20938 2.82188,1.20938c0.94062,0 2.01563,-0.40313 2.82187,-1.20938l20.15625,-20.15625c1.6125,-1.6125 1.6125,-4.16563 0,-5.64375c-1.6125,-1.6125 -4.16562,-1.6125 -5.64375,0l-13.30312,13.30313v-57.5125c0,-2.28438 -1.74688,-4.03125 -4.03125,-4.03125z"></path></g></g></svg>
+  </div>
+
+  <a id="download-a" style='display:none;'></a>
+ 
+  <button class="btn btn-primary" id="load-project">Sample Project</button>
+
+</div>
+
+
+
+<div id="number-area">
+  <canvas id="number-canvas"></canvas>
+  <canvas id="playhead-canvas"></canvas>
+</div>
+
+<div id="track-list">
+  <div id="track-list-grid">
+    <div class="dropdown" id="add-intrument">
+      <div id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        +
+        <br/>
+        Add New Track
+      </div>
+
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" id="add-inst-dropdown-menu"></div>
+    </div>
+  </div>
+</div>
+
+<div id="arrange-area" style:"display:flex; flex-direction:row">
+  <canvas id="grid-canvas"></canvas>
+</div>
+
+</div>
+
+<div id="zoom-horizontal">
+  <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" onclick="zoomHorizontal(1)"
+  width="48" height="48"
+  viewBox="0 0 172 172"
+  style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="zoom-button-path"><path d="M74.42044,16.68033c-26.43446,0.36587 -49.35304,18.38036 -55.95301,43.98026c-6.59997,25.5999 4.75201,52.44977 27.71454,65.5508c22.96253,13.10103 51.85285,9.21098 70.53232,-9.49709c11.10494,-10.92125 17.35931,-25.84431 17.35931,-41.41972c0,-15.57541 -6.25437,-30.49848 -17.35931,-41.41972c-11.195,-11.21155 -26.45154,-17.41408 -42.29385,-17.19451zM73.24123,24.96564c20.73555,-0.85304 39.87193,11.0985 48.20396,30.10556c8.33203,19.00706 4.15408,41.17877 -10.52411,55.84988c-9.45019,9.44493 -22.26565,14.74843 -35.62651,14.74354c-27.40043,-0.02618 -49.75424,-21.94976 -50.31284,-49.34451c-0.5586,-27.39475 20.88292,-50.21135 48.25951,-51.35447zM75.02376,30.21038c-11.84752,0.09527 -23.17385,4.88443 -31.49586,13.31752c-8.52084,8.4095 -13.31727,19.88226 -13.31727,31.85407c0,11.97182 4.79643,23.44458 13.31727,31.85407c17.82541,16.10799 45.14832,15.41701 62.13673,-1.57141c16.98842,-16.98842 17.6794,-44.31132 1.57141,-62.13673c-8.4965,-8.6099 -20.11635,-13.41389 -32.21229,-13.31752zM74.66725,55.28571c1.42444,0.04082 2.55782,1.20763 2.55724,2.63265v15.79592h15.79592c1.45397,0 2.63265,1.17868 2.63265,2.63265c0,1.45397 -1.17868,2.63265 -2.63265,2.63265h-15.79592v14.04082c0,1.45397 -1.17868,2.63265 -2.63265,2.63265c-1.45397,0 -2.63265,-1.17868 -2.63265,-2.63265v-14.04082h-14.04082c-1.45397,0 -2.63265,-1.17868 -2.63265,-2.63265c0,-1.45397 1.17868,-2.63265 2.63265,-2.63265h14.04082v-15.79592c-0.00029,-0.71149 0.2874,-1.3928 0.79756,-1.88875c0.51015,-0.49594 1.19932,-0.76429 1.91051,-0.74391zM124.78707,115.66191c-1.30933,1.71653 -2.71595,3.35663 -4.21293,4.91223c-1.5556,1.49698 -3.19569,2.9036 -4.91223,4.21293l28.60611,28.60954c1.55776,1.94315 4.08961,2.82423 6.51716,2.26797c2.42755,-0.55625 4.32315,-2.45184 4.8794,-4.8794c0.55625,-2.42755 -0.32483,-4.9594 -2.26797,-6.51716z"></path></g></g></svg>
+
+  <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" onclick="zoomHorizontal(-1)"
+  width="48" height="48"
+  viewBox="0 0 172 172"
+  style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="zoom-button-path"><path d="M74.42044,16.68033c-26.43446,0.36587 -49.35304,18.38036 -55.95301,43.98026c-6.59997,25.5999 4.75201,52.44977 27.71454,65.5508c22.96253,13.10103 51.85285,9.21098 70.53232,-9.49709c11.10494,-10.92125 17.35931,-25.84431 17.35931,-41.41972c0,-15.57541 -6.25437,-30.49848 -17.35931,-41.41972c-11.195,-11.21155 -26.45154,-17.41408 -42.29385,-17.19451zM73.24123,24.96564c20.73555,-0.85304 39.87193,11.0985 48.20396,30.10556c8.33203,19.00706 4.15408,41.17877 -10.52411,55.84988c-9.45019,9.44493 -22.26565,14.74843 -35.62651,14.74354c-27.40043,-0.02618 -49.75424,-21.94976 -50.31284,-49.34451c-0.5586,-27.39475 20.88292,-50.21135 48.25951,-51.35447zM75.02376,30.21038c-11.84752,0.09527 -23.17385,4.88443 -31.49586,13.31752c-8.52084,8.4095 -13.31727,19.88226 -13.31727,31.85407c0,11.97182 4.79643,23.44458 13.31727,31.85407c17.82541,16.10799 45.14832,15.41701 62.13673,-1.57141c16.98842,-16.98842 17.6794,-44.31132 1.57141,-62.13673c-8.4965,-8.6099 -20.11635,-13.41389 -32.21229,-13.31752zM57.91837,73.71429h35.10204c1.45397,0 2.63265,1.17868 2.63265,2.63265c0,1.45397 -1.17868,2.63265 -2.63265,2.63265h-35.10204c-1.45397,0 -2.63265,-1.17868 -2.63265,-2.63265c0,-1.45397 1.17868,-2.63265 2.63265,-2.63265zM124.78707,115.66191c-1.30933,1.71653 -2.71595,3.35663 -4.21293,4.91223c-1.5556,1.49698 -3.19569,2.9036 -4.91223,4.21293l28.60611,28.60954c1.55776,1.94315 4.08961,2.82423 6.51716,2.26797c2.42755,-0.55625 4.32315,-2.45184 4.8794,-4.8794c0.55625,-2.42755 -0.32483,-4.9594 -2.26797,-6.51716z"></path></g></g></svg>
+</div>
+
+<!-- Notes Modal -->
+<div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="noteModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="noteModalTitle">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-toggle="tab" data-target="#nav-theme" type="button" role="tab" aria-controls="nav-theme" aria-selected="true">
+              Theme
+            </button>
+          </li>
+        </ul>
+
+        <form id="themeSelector">
+          <input type="radio" class="theme-options" id="theme-light" name="theme" value="light">
+            <label for="theme-light">Light</label>
+
+          <input type="radio" class="theme-options" id="theme-dark" name="theme" value="dark" checked>
+            <label for="theme-dark">Dark</label>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Line Settings Modal -->
+<div class="modal fade" id="lineSettingsModal" tabindex="-1" role="dialog" aria-labelledby="lineSettingsModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="noteModalTitle">Line Settings</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-toggle="tab" data-target="#transpose-line" type="button" role="tab" aria-controls="transpose-line" aria-selected="false">
+              Transpose
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-toggle="tab" data-target="#delete-line" type="button" role="tab" aria-controls="delete-line" aria-selected="false">
+              Delete
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" style="margin-top: 20px; display:flex; align-items:center; justify-content:center; user-select: none;">
+          <div class="container tab-pane" id="transpose-line" role="tab-panel" style="align-items:center; justify-content:center; flex-direction:column;">
+            <div>
+            <div class="transpose-button" value="minus" style="display:inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="18" height="18"
+                viewBox="0 0 172 172"
+                style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="transpose-button-path" fill="#ffffff" style="fill: rgb(255, 255, 255);"><path d="M21.5,78.83333v14.33333h129v-14.33333z"></path></g></g>
+            </div>
+
+            <h4 style="display:inline-flex">Tranpose</h4>
+
+            <div class="transpose-button" value="plus" style="display:inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                width="18" height="18"
+                viewBox="0 0 172 172"
+                style=" fill:#000000;"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,172v-172h172v172z" fill="none"></path><g class="transpose-button-path" fill="#ffffff" style="fill: rgb(255, 255, 255);"><path d="M78.83333,21.5v57.33333h-57.33333v14.33333h57.33333v57.33333h14.33333v-57.33333h57.33333v-14.33333h-57.33333v-57.33333z"></path></g></g></svg>
+            </div>
+            </div>
+
+            <h5 class="transpose-value">0</h5>
+
+          </div>
+
+
+          <div class="container tab-pane" id="delete-line" role="tab-panel">
+            <h4>Deleting is permanent. Are you sure you want to delete this line?</h4>
+          </div>
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div id="transpose-line-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="transpose-line-button">Confirm</button>
+        </div>
+
+        <div id="delete-line-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal" onclick='confirmDeleteLine()'>Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
